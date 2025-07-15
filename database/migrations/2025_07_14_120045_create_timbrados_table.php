@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('numero_siguiente')->default(0);
             $table->string('codigo_set_id' , 100);
             $table->string('codigo_cliente_set', 250);
+            $table->foreignId('estado_id')->constrained();
             $table->timestamps();
         });
     }

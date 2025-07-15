@@ -34,7 +34,7 @@
         </li>
 
         <li class="menu">
-            <a href="{{route('registro.index')}}" aria-expanded="false" class="dropdown-toggle" 
+            <a href="{{route('registro.index')}}" aria-expanded="false" class="dropdown-toggle"
                 @if(Str::startsWith(Route::currentRouteName(), 'registro.index')) data-active="true" @endif
                 @if(Str::startsWith(Route::currentRouteName(), 'registro.create')) data-active="true" @endif
                 >

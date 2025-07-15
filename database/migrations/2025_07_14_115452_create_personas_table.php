@@ -23,7 +23,7 @@ return new class extends Migration
             $table->tinyInteger('estado_civil')->default(0);
             $table->string('email', 250);
             $table->string('celular', 20)->nullable();
-            $table->string('ruc', 20);
+            $table->string('ruc', 20)->nullable();
             $table->foreignId('estado_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->bigInteger('usuario_modificacion');

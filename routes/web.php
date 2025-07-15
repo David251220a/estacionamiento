@@ -31,4 +31,5 @@ Route::group([
 
     Route::get('/registro-diario', [RegistroDiarioController::class, 'index'])->name('registro.index');
     Route::get('/registro-diario/create', [RegistroDiarioController::class, 'create'])->name('registro.create');
+    Route::get('/registro-diario/{registro_diario}/pagar-tarifa', [RegistroDiarioController::class, 'pagar_tarifa'])->name('registro.pagar_tarifa');
 });

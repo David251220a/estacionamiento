@@ -10,6 +10,8 @@ class Persona extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function getTienePlanActivoAttribute()
     {
         $fecha = Carbon::now()->toDateString();
@@ -18,5 +20,10 @@ class Persona extends Model
         ->where('estado_id', 1)
         ->where('fecha_fin', '>=', $fecha)
         ->exists(); // Devuelve true o false
+    }
+
+    public function vehiculo_ultimo_registro()
+    {
+        return $this->hasOne(Vehiculo::class, 'persona_id')->latest();
     }
 }

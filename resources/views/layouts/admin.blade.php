@@ -33,28 +33,7 @@
             <div class="layout-px-spacing">
 
                 <div class="row layout-top-spacing">
-                    @if ($errors->any())
-                        <div class="widget-content widget-content-area" style="padding: 0px">
-                            <div class="alert alert-icon-left alert-light-danger mt-4" role="alert">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>
-                                            {{ $error }}
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
-                    @if(session()->has('message'))
-                        <div class="mt-10" style="border: rgb(25, 66, 25) 2px solid; margin-top:25px;border-radius:10px
-                            ;margin-left:5px;background:rgb(25, 66, 25); color:white;font-size:20px">
-                            <p class="px-4">{{ session()->get('message') }}</p>
-                        </div>
-                    @endif
-
                     @yield('content')
-
                 </div>
             </div>
             <div class="footer-wrapper">

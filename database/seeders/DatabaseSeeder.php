@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Estado;
 use App\Models\Sexo;
+use App\Models\Timbrado;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -46,6 +47,17 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        Timbrado::create([
+            'timbrado' => '18043139',
+            'fecha_inicio' => '2025-05-21',
+            'numero_inicial' => 1,
+            'numero_final' => 9999999,
+            'numero_siguiente' => 1,
+            'codigo_set_id' => '001',
+            'codigo_cliente_set' => 'B326123F3fd345C3a60F333B2025Ee9E',
+            'estado_id' => 1,
+        ]);
+
         $this->call([
             ColorSeeder::class,
             MarcaSeeder::class,
@@ -54,6 +66,7 @@ class DatabaseSeeder extends Seeder
             EntidadSeeder::class,
             ActividadEconomicaSeeder::class,
             FormaCobroSeeder::class,
+            BancoSeeder::class,
         ]);
 
     }
