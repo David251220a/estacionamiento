@@ -16,12 +16,14 @@ return new class extends Migration
         Schema::create('facturas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('persona_id')->constrained();
+            $table->foreignId('registro_diario_id')->constrained();
             $table->foreignId('plan_id')->constrained();
             $table->foreignId('vehiculo_id')->constrained();
             $table->foreignId('timbrado_id')->constrained();
             $table->integer('numero_factura')->default(0);
             $table->bigInteger('plan_persona')->default(1);
             $table->date('fecha_factura');
+            $table->string('concepto');
             $table->decimal('monto_total', 12, 0)->default(0);
             $table->decimal('monto_abonado', 12, 0)->default(0);
             $table->decimal('monto_devuelto', 12, 0)->default(0);

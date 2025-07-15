@@ -33,6 +33,18 @@
             </a>
         </li>
 
+        <li class="menu">
+            <a href="{{route('registro.index')}}" aria-expanded="false" class="dropdown-toggle" 
+                @if(Str::startsWith(Route::currentRouteName(), 'registro.index')) data-active="true" @endif
+                @if(Str::startsWith(Route::currentRouteName(), 'registro.create')) data-active="true" @endif
+                >
+                <div class="">
+                    <i class="fas fa-solid fa-car mr-3"></i>
+                    <span>Registro</span>
+                </div>
+            </a>
+        </li>
+
         {{-- <li class="menu">
             <a href="{{route('cobro.registro')}}" aria-expanded="false" class="dropdown-toggle" @if(Str::startsWith(Route::currentRouteName(), 'cobro.registro')) data-active="true" @endif>
                 <div class="">

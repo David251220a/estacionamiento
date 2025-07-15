@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained();
             $table->bigInteger('plan_persona')->default(1);
             $table->decimal('monto', 12, 0)->default(0);
+            $table->time('hora_ingreso');
+            $table->time('hora_salida');
             $table->timestamps();
         });
     }

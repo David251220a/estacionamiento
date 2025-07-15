@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\RegistroDiarioController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,7 @@ Route::group([
     'middleware' => 'auth',
 ], function(){
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+    Route::get('/registro-diario', [RegistroDiarioController::class, 'index'])->name('registro.index');
+    Route::get('/registro-diario/create', [RegistroDiarioController::class, 'create'])->name('registro.create');
 });
-
-

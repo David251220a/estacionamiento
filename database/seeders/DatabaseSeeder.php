@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $sexo = ['ACTIVO', 'INACTIVO'];
+        $sexo = ['SIN ESPECIFICAR', 'MASCULINO', 'FEMENINO'];
 
         foreach ($sexo as $item) {
             Sexo::firstOrCreate([

@@ -70,6 +70,8 @@
 
     <!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
     @include('layouts.principal.footer')
+    @livewireScripts
+    @yield('js')
     <!-- END GLOBAL MANDATORY SCRIPTS -->
 </body>
 
