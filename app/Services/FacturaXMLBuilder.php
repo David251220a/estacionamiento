@@ -8,6 +8,9 @@ use Brick\Math\BigInteger;
 use App\Helpers\SifenHelper;
 use App\Models\Factura;
 use App\Models\Sifen;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use RobRichards\XMLSecLibs\Utils\XPath;
 use DOMDocument;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +26,7 @@ class FacturaXMLBuilder
         $this->sifenHelper = new SifenHelper();
     }
 
-    public function generate(array $json, BigInteger $timbrado_id): string
+    public function generate(array $json, int $timbrado_id): string
     {
         try {
 
@@ -56,7 +59,6 @@ class FacturaXMLBuilder
                 $_codeCSC = "001";
                 $_dCSC    = "ABCD0000000000000000000000000000";
             }
-
             $iTImp = '1';
             $cActEco = "";
             foreach ($this->entidad->actividades as $item) {
@@ -83,7 +85,7 @@ class FacturaXMLBuilder
             if ($fechaDoc < $timbrado->fecha_inicio) {
                 throw new \Exception('ERROR - El número de timbrado no se encuentra vigente a la fecha de emisión del comprobante..');
             }
-
+            
             /*gTimb*/
             $establecimiento = $this->sifenHelper->leftzero($datos['establecimiento'], 3);
             $tipoDocumento = $datos['tipoDocumento'];
@@ -112,11 +114,14 @@ class FacturaXMLBuilder
             $dDirEmi    = $this->entidad->direccion;
             $dNumCas    = $this->entidad->numero_casa;
             $cDepEmi    = $this->entidad->departamento_id;
-            $dDesDepEmi = $this->entidad->departamentos->descripcion;
+            //$dDesDepEmi = $this->entidad->departamentos->descripcion;
+            $dDesDepEmi = 'CAPITAL';
             $cDisEmi    = $this->entidad->distrito_id;
-            $dDesDisEmi = $this->entidad->distritos->descripcion;
+            //$dDesDisEmi = $this->entidad->distritos->descripcion;
+            $dDesDisEmi = 'ASUNCION (DISTRITO)';
             $cCiuEmi    = $this->entidad->ciudad_id;
-            $dDesCiuEmi = $this->entidad->ciudades->descripcion;
+            //$dDesCiuEmi = $this->entidad->ciudades->descripcion;
+            $dDesCiuEmi = 'ASUNCION (DISTRITO)';
             $dTelEmi    = $this->entidad->telefono;
             $remisionAsoc = data_get($datos, 'documentoAsociado.remision', false);
             if ($tipoDocumento == "5" || $remisionAsoc == true) {
@@ -572,6 +577,8 @@ class FacturaXMLBuilder
                     }
                     $genXML .= '</gPagCred>';
                 }
+                $genXML .= '</gCamCond>
+                ';
 
             } else if ($tipoDocumento == 7) {
                 $genXML .= '
@@ -617,7 +624,7 @@ class FacturaXMLBuilder
                                 <dCodInt>' . $prod[$i]['codigo'] . '</dCodInt>
                                 <dDesProSer> ' . htmlspecialchars(str_replace('\/', '/', $prod[$i]['descripcion']), ENT_XML1, 'UTF-8') . '</dDesProSer>
                             <cUniMed>' . $prod[$i]['unidadMedida'] . '</cUniMed>
-                            <dDesUniMed>' . $this->sifenHelper->nidadMedida($prod[$i]['unidadMedida']) . '</dDesUniMed>
+                            <dDesUniMed>' . $this->sifenHelper->unidadMedida($prod[$i]['unidadMedida']) . '</dDesUniMed>
                             <dCantProSer>' . $this->sifenHelper->formatoTotales($prod[$i]['cantidad'], 4) . '</dCantProSer>';
                 if ($tipoDocumento != 7) {
                     $genXML .= '<gValorItem>
@@ -804,13 +811,110 @@ class FacturaXMLBuilder
 
             $genXML .= '</DE></rDE>';
 
-            // $path = "files/" . $cdc . ".xml";
+            //$path = "files/" . $cdc . ".xml";
+            if (!Storage::disk('public')->exists('files')) {
+                Storage::disk('public')->makeDirectory('files');
+            }
+
+            if (!Storage::disk('public')->exists('firmados')) {
+                Storage::disk('public')->makeDirectory('firmados');
+            }
+
+            //EMPIEZA FIRMA
             $relativePath = 'files/' . $cdc . '.xml';
             $absolutePath = Storage::disk('public')->path($relativePath);
             $modo = "w+";
-            if ($fp = fopen($path, $modo)) {
+            if ($fp = fopen($absolutePath, $modo)) {
+                fwrite($fp, $genXML);
+                $xml = file_get_contents($absolutePath);
+                $doc = new DOMDocument();
+                $doc->loadXML($xml, true);
+                //$ruta_cert = storage_path('app/keys/' . $p12_file);
+                $ruta_cert = storage_path('app/keys/firma.p12');
+                $pkcs12 = file_get_contents($ruta_cert);
+                $priv_key = null;
+                $certs    = array();
+                //$password = $p12_pass;
+                $password = 'LqO#9j0E';
+                if (openssl_pkcs12_read($pkcs12, $certs, $password)) {
+                    $priv_key = $certs['pkey'];
+                    $cert     = $certs['cert'];
+                } else {
+                    throw new \Exception("Error de contraseña: Verifica que la contraseña de tu clave privada sea correcta." . $ruta_cert);
+                }
 
+                $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+                $key->loadKey($priv_key);
+
+                $objDSig = new XMLSecurityDSig('', array('prefix' => 'ds'));
+                $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
+
+                $objDSig->addReference(
+                    $doc->documentElement->getElementsByTagName('DE')->item(0),
+                    XMLSecurityDSig::SHA256,
+                    array(
+                        'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
+                        'http://www.w3.org/2001/10/xml-exc-c14n#',
+                    ),
+                    array(
+                        'id_name'   => 'Id',
+                        'overwrite' => false,
+                    )
+                );                
+
+                $objDSig->sign($key);
+                $objDSig->add509Cert($cert);
+                // Obtener el nodo de firma
+                $signatureNode = $objDSig->sigNode;
+
+                // Establecer el valor del atributo Id en el nodo de firma
+                //no hace falta,
+                //$signatureNode->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:id', 'asd'); 
+
+                $objDSig->insertSignature($doc->documentElement);
+
+                $xml_firmado = $doc->saveXML();
+                $relativePathFirma = 'firmados/' . $cdc . '.xml';
+                Storage::disk('public')->put($relativePathFirma, $xml_firmado);
+                $absolutePathFirma = Storage::disk('public')->path($relativePathFirma);
+                //$firmados = 'firmados/' . $cdc . '.xml';	
+                //file_put_contents($absolutePathFirma, $xml_firmado);
+                $doc = new DOMDocument();
+                $doc->load($absolutePathFirma);
+
+                $referenceNode = $doc->getElementsByTagName('Reference')->item(0);
+                $digestValueNode = $referenceNode->getElementsByTagName('DigestValue')->item(0);
+                $digestValue = $digestValueNode->nodeValue;
+
+                $rucLink = $this->sifenHelper->rucCliente($RucPOS, $diplomatico, $cPaisRec);
+
+                $preLinkQR = $this->sifenHelper->preLinkQR($versionQr, $cdc, $this->sifenHelper->hashValores($dFeEmiDE)
+                , $rucLink, $this->sifenHelper->formatoTotales($totalOperacion, 8), $this->sifenHelper->formatoTotales($totalIvaLiq5 + $totalIvaLiq10, 8)
+                , $cantItems, $this->sifenHelper->hashValores($digestValue), $_codeCSC);
+
+                $cHashQR = $this->sifenHelper->gencHashQR($preLinkQR, $_dCSC);
+                $linkQR = $this->sifenHelper->linkQR($linkQrBase, $preLinkQR, $cHashQR);
+                $linkXml = htmlspecialchars($linkQR);
+
+                //$xml_file = 'firmados/' . $cdc . '.xml'; // Ruta y nombre del archivo XML
+                $xml      = simplexml_load_file($absolutePathFirma); // Cargamos el archivo XML en un objeto SimpleXMLElement
+                // Buscamos la etiqueta </signature> y la reemplazamos con las nuevas etiquetas
+                $signature_pos = strpos($xml->asXML(), "</Signature>");
+                if ($signature_pos !== false) {
+                    $xml_str = substr_replace($xml->asXML(), "</Signature><gCamFuFD><dCarQR>{$linkXml}</dCarQR></gCamFuFD", $signature_pos, 11);
+                }
+                file_put_contents($absolutePathFirma, $xml_str);
+                if (!Storage::disk('public')->exists('enviado')) {
+                    Storage::disk('public')->makeDirectory('enviado');
+                }
+                //file_put_contents('../sifen/ekuatia/recibido/'. $cdc . '.xml', $xml_str);
+                Storage::disk('public')->put('enviado/' . $cdc . '.xml', $xml_str);
+
+                $nombreArchivo = $cdc . '.xml';
+            } else {
+                throw new \Exception("No se pudo crear el archivo XML en la ruta: $absolutePath");
             }
+            //TERMINA FIRMA
 
             return $nombreArchivo;
 
@@ -953,7 +1057,7 @@ class FacturaXMLBuilder
     public function verificar_duplicado($factura_id)
     {
         $existe = Sifen::where('factura_id', $factura_id)
-            ->where('estado', 'APROBADO') // solo bloqueamos si ya está aprobado
+            ->where('sifen_estado', 'APROBADO') // solo bloqueamos si ya está aprobado
             ->exists();
 
         if ($existe) {
@@ -963,5 +1067,5 @@ class FacturaXMLBuilder
         return null;
     }
 
-
 }
+

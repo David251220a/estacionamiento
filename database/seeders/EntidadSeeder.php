@@ -29,7 +29,8 @@ class EntidadSeeder extends Seeder
             'departamento_id' => 1,
             'distrito_id' => 1,
             'telefono' => '021497189',
-            'direccion' => 'Benjamin Constant 955 c/ Colon y Montevideo'
+            'direccion' => 'Benjamin Constant 955 c/ Colon y Montevideo',
+            'ciudad_id' => 1,
         ]);
     }
 }

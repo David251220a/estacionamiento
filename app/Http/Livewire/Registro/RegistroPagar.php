@@ -203,6 +203,7 @@ class RegistroPagar extends Component
                     'plan_id' => $this->plan_id,
                     'plan_persona' => $plan_persona,
                     'monto' => $_total_a_pagar,
+                    'cantidad' => 1,
                     'hora_ingreso' => $this->registro_diario->hora_ingreso,
                     'hora_salida' => $hora_salida,                    
                 ]);

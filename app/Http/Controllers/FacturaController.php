@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Factura;
 use App\Services\FacturaJsonBuilder;
+use App\Services\FacturaXMLBuilder;
 use Illuminate\Http\Request;
 
 class FacturaController extends Controller
@@ -12,8 +13,12 @@ class FacturaController extends Controller
     {
 
         $builder = new FacturaJsonBuilder($factura);
+        $xml = new FacturaXMLBuilder();
         $json = $builder->build();
-        return $json;
+        //return $json;
+        $nombre_archivo =  $xml->generate($json, $factura->timbrado_id);
+        
+        return $nombre_archivo;
 
         return view('factura.show', compact('factura'));
     }

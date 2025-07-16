@@ -224,6 +224,7 @@ class SifenHelper
     /* datos del establecimiento */
     public static function direccionEstablecimiento($value, $empresa)
     {
+        return 'direccion ya tu sabe';
         // INCLUYE LA DIRECCION NO NECESITAMOS POR QUE VIENE DE LA BD EN LA TABLA ENTIDAD
         // include 'connect.php';
         // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
@@ -239,7 +240,7 @@ class SifenHelper
 
     public static  function numeroCasa($value, $empresa)
     {
-
+        return '0';
         // LO MISMO SE RECUPERA DE LA TABLA ENTIDAD
 
         // include 'connect.php';
@@ -255,6 +256,7 @@ class SifenHelper
 
     public static function codigoDepartamentoEmi($value, $empresa)
     {
+        return 1;
         // include 'connect.php';
         // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
 
@@ -268,6 +270,7 @@ class SifenHelper
 
     public static  function descDepartamentoEmi($value, $empresa)
     {
+        return 'ASUNCION';
         // include 'connect.php';
         // $sql = "select d.nombre as nombre from departamentos d
         // join establecimientos e on e.cod_dep=d.cod
@@ -282,6 +285,7 @@ class SifenHelper
 
     public static function codigoCiudadEmi($value, $empresa)
     {
+        return 1;
         // include 'connect.php';
         // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
 
@@ -295,6 +299,7 @@ class SifenHelper
 
     public static function descCiudadEmi($value, $empresa)
     {
+        return 'ASUNCION';
         // include 'connect.php';
         // $sql = "select d.nombre as nombre from ciudades d
         // join establecimientos e on e.cod_ciudad=d.cod
@@ -309,6 +314,7 @@ class SifenHelper
 
     public static function codigoDistritoEmi($value, $empresa)
     {
+        return 1;
         // include 'connect.php';
         // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
 
@@ -322,20 +328,12 @@ class SifenHelper
 
     public static function descDistritoEmi($value, $empresa)
     {
-        include 'connect.php';
-        $sql = "select d.nombre as nombre from distritos d
-        join establecimientos e on e.cod_distri=d.cod
-        where codigo='$value' and empresa='$empresa' limit 1";
-        $exe = pg_query($factPy, $sql);
-        while ($row = pg_fetch_array($exe)) {
-            $value = $row['nombre'];
-        }
-
-        return $value;
+        return 'ASUNCION';
     }
 
     public static function telefonoEmi($value, $empresa)
     {
+        return '05214';
         // include 'connect.php';
         // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
 
