@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('forma_cobros', function (Blueprint $table) {
+        Schema::create('tipo_transaccions', function (Blueprint $table) {
             $table->id();
-            $table->string('descripcion');
-            $table->tinyInteger('banco_ver')->default(0);
-            $table->foreignId('estado_id')->constrained();
-            $table->foreignId('user_id')->constrained();
+            $table->string('descripcion', 100);
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('forma_cobros');
+        Schema::dropIfExists('tipo_transaccions');
     }
 };

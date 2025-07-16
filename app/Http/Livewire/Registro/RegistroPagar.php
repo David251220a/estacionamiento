@@ -5,19 +5,19 @@ namespace App\Http\Livewire\Registro;
 use App\Models\Banco;
 use App\Models\Factura;
 use App\Models\FacturaDetalle;
+use App\Models\FacturaPago;
 use App\Models\FormaCobro;
 use App\Models\Plan;
 use App\Models\PlanPersona;
 use App\Models\RegistroDiario;
 use App\Models\Timbrado;
 use Carbon\Carbon;
-use GuzzleHttp\RetryMiddleware;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class RegistroPagar extends Component
 {
-    public $registro_diario, $persona, $planes, $forma_cobros, $bancos;
+    public $registro_diario, $persona, $planes, $forma_cobros, $bancos, $factura;
     public $email, $ruc, $plan_id, $precio, $titulo_cantidad, $cantidad, $total_a_pagar
     , $hora_computada, $total_pagado, $banco_id, $forma_pago_id, $vuelto, $hora_salida;
     public $ver_hora, $ver_resto, $verBanco, $modificar_total_pagar, $ver_vuelto;
@@ -171,6 +171,7 @@ class RegistroPagar extends Component
                         $plan_persona = $this->crear_plan_persona($this->plan_id, $this->cantidad);
                     }
                 }
+                
                 $concepto = $this->concepto_construir($this->plan_id, $this->cantidad, $this->hora_computada);
 
                 $factura = Factura::create([
@@ -182,6 +183,8 @@ class RegistroPagar extends Component
                     'numero_factura' => $numero_factura,
                     'plan_persona' => $plan_persona,
                     'fecha_factura' => $fecha,
+                    'tipo_documento_id' => 1,
+                    'tipo_transaccion_id' => 2,
                     'concepto' => $concepto,
                     'monto_total' => $_total_a_pagar,
                     'monto_abonado' => $_total_abonado,
@@ -193,6 +196,8 @@ class RegistroPagar extends Component
                     'motivo_anulacion' => null,
                 ]);
 
+                $this->factura = $factura;
+
                 FacturaDetalle::create([
                     'factura_id' => $factura->id,
                     'plan_id' => $this->plan_id,
@@ -200,12 +205,33 @@ class RegistroPagar extends Component
                     'monto' => $_total_a_pagar,
                     'hora_ingreso' => $this->registro_diario->hora_ingreso,
                     'hora_salida' => $hora_salida,                    
-                ]);                
+                ]);
+                
+                FacturaPago::create([
+                    'factura_id' => $factura->id,
+                    'forma_cobro_id' => $this->forma_pago_id,
+                    'banco_id' => $this->banco_id,
+                    'monto' => $_total_a_pagar,
+                ]);
+
+                $registro = RegistroDiario::find($this->registro_diario->id);
+                
+                $registro->update([
+                    'facturado' => 1,
+                    'user_id' => auth()->user()->id,
+                ]);
+
+                $timbrado->numero_siguiente += 1;
+                $timbrado->save();
 
             });
+
+            return redirect()->route('factura.show', $this->factura)->with('message', 'Facturado correctamente.');
+            
         } catch (\Throwable $e) {
             $this->emit('mensaje_error', 'Ocurrió un error al generar la factura: ' . $e->getMessage());
             $this->procesando = false;
+            return false;
         }
 
     }

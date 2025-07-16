@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\Estado;
 use App\Models\Sexo;
 use App\Models\Timbrado;
+use App\Models\TipoTransaccion;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -51,6 +52,8 @@ class DatabaseSeeder extends Seeder
             'timbrado' => '18043139',
             'fecha_inicio' => '2025-05-21',
             'numero_inicial' => 1,
+            'general' => '001',
+            'sucursal' => '001',
             'numero_final' => 9999999,
             'numero_siguiente' => 1,
             'codigo_set_id' => '001',
@@ -63,10 +66,12 @@ class DatabaseSeeder extends Seeder
             MarcaSeeder::class,
             TipoVehiculoSeeder::class,
             PlanSeeder::class,
+            TipoTransaccionSeeder::class,
             EntidadSeeder::class,
             ActividadEconomicaSeeder::class,
             FormaCobroSeeder::class,
             BancoSeeder::class,
+            TipoDocumentoSeeder::class,
         ]);
 
     }

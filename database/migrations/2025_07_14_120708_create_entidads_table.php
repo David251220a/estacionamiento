@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('tipo_contribuyente');
             $table->integer('tipo_regimen')->nullable();
             $table->string('email');
+            $table->foreignId('tipo_transaccion_id')->constrained();
             $table->tinyInteger('ambiente')->default(0);
             $table->timestamps();
         });

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\RegistroDiarioController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -32,4 +33,6 @@ Route::group([
     Route::get('/registro-diario', [RegistroDiarioController::class, 'index'])->name('registro.index');
     Route::get('/registro-diario/create', [RegistroDiarioController::class, 'create'])->name('registro.create');
     Route::get('/registro-diario/{registro_diario}/pagar-tarifa', [RegistroDiarioController::class, 'pagar_tarifa'])->name('registro.pagar_tarifa');
+
+    Route::get('/factura/{factura}/ver', [FacturaController::class, 'show'])->name('factura.show');
 });

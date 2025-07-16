@@ -22,6 +22,7 @@ class EntidadSeeder extends Seeder
             'tipo_contribuyente' => 2,
             'tipo_regimen' => null,
             'email' => 'cajamunicipal.presidencia@gmail.com',
+            'tipo_transaccion_id' => 2,
             'ambiente' => 0,
         ]);
     }

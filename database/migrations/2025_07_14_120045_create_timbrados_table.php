@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('timbrado', 100);
             $table->date('fecha_inicio');
+            $table->string('general', 3);
+            $table->string('sucursal', 3);
             $table->integer('numero_inicial')->default(0);
             $table->integer('numero_final')->default(0);
             $table->integer('numero_siguiente')->default(0);

@@ -16,11 +16,12 @@ class PlanSeeder extends Seeder
     public function run()
     {
         $plan = ['HORA', 'DIA', 'SEMANAL', 'MENSUAL', 'ANUAL'];
+        $montos = [10000, 30000, 120000, 300000, 3600000];
 
-        foreach ($plan as $item) {
+        foreach ($plan as $index => $item) {
             Plan::firstOrCreate([
                 'descripcion' => $item,
-                'precio' => 10000,
+                'precio' => $montos[$index],
                 'dias' => 1,
                 'estado_id' => 1,
                 'user_id' => 1,
