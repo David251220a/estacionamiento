@@ -53,7 +53,19 @@ class FacturaJsonBuilder
             'diplomatico' => false,
             'dncp' => 0
         ];
-        
+
+        // $json['documentoAsociado'] = [
+        //     'remision' => false,
+        //     'tipoDocumentoAsoc' => 1,
+        //     'cdcAsociado' => '',
+        //     'establecimientoAsoc' => '',
+        //     'puntoAsoc' => '',
+        //     'numeroAsoc' => '',
+        //     'tipoDocuemntoIm' => '1',
+        //     'fechaDocIm' => '',
+        //     'timbradoAsoc' => ''
+        // ];
+
         $items = [];
         foreach ($this->facturaDetalle as $item) {
             $items[] = [

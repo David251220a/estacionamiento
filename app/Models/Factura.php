@@ -25,4 +25,14 @@ class Factura extends Model
     {
         return $this->belongsTo(Persona::class, 'persona_id');
     }
+
+    public function tipodocumentofactura()
+    {
+        return $this->belongsTo(TipoDocumento::class, 'tipo_documento_id');
+    }
+
+    public function tipoTransaccionFactura()
+    {
+        return $this->belongsTo(TipoTransaccion::class, 'tipo_transaccion_id');
+    }
 }

@@ -18,11 +18,19 @@ return new class extends Migration
             $table->string('razon_social', 250);
             $table->string('nombra_fantasia', 250);
             $table->string('ruc');
+            $table->string('ruc_sin_digito');
+            $table->string('digito_verificador');
             $table->integer('tipo_contribuyente');
             $table->integer('tipo_regimen')->nullable();
             $table->string('email');
             $table->foreignId('tipo_transaccion_id')->constrained();
             $table->tinyInteger('ambiente')->default(0);
+            $table->text('direccion');
+            $table->bigInteger('departamento_id');
+            $table->integer('numero_casa')->default(0);
+            $table->string('telefono')->nullable();
+            $table->bigInteger('distrito_id');
+            $table->bigInteger('ciudad_id');
             $table->timestamps();
         });
     }
