@@ -8,12 +8,21 @@
 @section('content')
 
     @include('varios.mensaje')
-    
+
     <div class="row">
-        <h4> Factura</h4>
-        <a href="#" class="btn btn-success">Crear Xml</a>
+        <div class="col-md-12">
+            <h4> Factura</h4>
+            <br>
+            <h4>{{$sifen->cdc}}</h4>
+            <h4>Sifen Mensaje: {{$sifen->sifen_mensaje}}</h4>
+            <a href="#" class="btn btn-success">Crear Xml</a>
+            <form action="{{route('sifen.enviar', $sifen)}}" method="post">
+                @csrf
+                <button type="submit" class="btn btn-success">Enviar Sifen</button>
+            </form>
+        </div>
     </div>
-    
+
 
 @endsection
 

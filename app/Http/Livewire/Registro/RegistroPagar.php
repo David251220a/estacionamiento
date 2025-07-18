@@ -3,14 +3,18 @@
 namespace App\Http\Livewire\Registro;
 
 use App\Models\Banco;
+use App\Models\Entidad;
+use App\Models\Establecimiento;
 use App\Models\Factura;
 use App\Models\FacturaDetalle;
 use App\Models\FacturaPago;
 use App\Models\FormaCobro;
+use App\Models\Numeracion;
 use App\Models\Plan;
 use App\Models\PlanPersona;
 use App\Models\RegistroDiario;
 use App\Models\Timbrado;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -152,8 +156,20 @@ class RegistroPagar extends Component
                 $_total_a_pagar = str_replace('.', '', $this->total_a_pagar);
                 $vuelto = $_total_abonado - $_total_a_pagar;
                 $hora_salida = $this->hora_salida->format('H:i');
+                $tipoDocumento = 1;
+                $usuario = User::find(auth()->user()->id);
+                $entidad = Entidad::find(1);
+                $usuario_establecimiento = $usuario->usuarioEstablecimiento;
+                $establecimiento = Establecimiento::find($usuario_establecimiento->establecimiento_id)
+                ->first();
+                $timbrado = Timbrado::where('entidad_id', $entidad->id)
+                ->where('estado_id', 1)
+                ->first();
 
-                $timbrado = Timbrado::where('estado_id', 1)
+                $numeracion = Numeracion::where('timbrado_id', $timbrado->id)
+                ->where('establecimiento_id', $establecimiento->id)
+                ->where('tipo_documento_id', $tipoDocumento)
+                ->where('estado_id', 1)
                 ->lockForUpdate()
                 ->first();
 
@@ -161,7 +177,7 @@ class RegistroPagar extends Component
                     throw new \Exception('No se encontró un timbrado activo.');
                 }
 
-                $numero_factura = $timbrado->numero_siguiente;
+                $numero_factura = $numeracion->numero_siguiente;
                 $plan_persona = 0;
 
                 if($this->plan_id <> 1){
@@ -171,7 +187,7 @@ class RegistroPagar extends Component
                         $plan_persona = $this->crear_plan_persona($this->plan_id, $this->cantidad);
                     }
                 }
-                
+
                 $concepto = $this->concepto_construir($this->plan_id, $this->cantidad, $this->hora_computada);
 
                 $factura = Factura::create([
@@ -180,11 +196,13 @@ class RegistroPagar extends Component
                     'plan_id' => $this->plan_id,
                     'vehiculo_id' => $this->persona->vehiculo_ultimo_registro->id,
                     'timbrado_id' => $timbrado->id,
+                    'establecimiento_id' => $establecimiento->id,
                     'numero_factura' => $numero_factura,
                     'plan_persona' => $plan_persona,
                     'fecha_factura' => $fecha,
                     'tipo_documento_id' => 1,
                     'tipo_transaccion_id' => 2,
+                    'condicion_pago' => 1,
                     'concepto' => $concepto,
                     'monto_total' => $_total_a_pagar,
                     'monto_abonado' => $_total_abonado,
@@ -205,9 +223,9 @@ class RegistroPagar extends Component
                     'monto' => $_total_a_pagar,
                     'cantidad' => 1,
                     'hora_ingreso' => $this->registro_diario->hora_ingreso,
-                    'hora_salida' => $hora_salida,                    
+                    'hora_salida' => $hora_salida,
                 ]);
-                
+
                 FacturaPago::create([
                     'factura_id' => $factura->id,
                     'forma_cobro_id' => $this->forma_pago_id,
@@ -216,19 +234,19 @@ class RegistroPagar extends Component
                 ]);
 
                 $registro = RegistroDiario::find($this->registro_diario->id);
-                
+
                 $registro->update([
                     'facturado' => 1,
                     'user_id' => auth()->user()->id,
                 ]);
 
-                $timbrado->numero_siguiente += 1;
-                $timbrado->save();
+                $numeracion->numero_siguiente += 1;
+                $numeracion->save();
 
             });
 
             return redirect()->route('factura.show', $this->factura)->with('message', 'Facturado correctamente.');
-            
+
         } catch (\Throwable $e) {
             $this->emit('mensaje_error', 'Ocurrió un error al generar la factura: ' . $e->getMessage());
             $this->procesando = false;

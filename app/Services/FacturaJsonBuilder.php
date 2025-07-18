@@ -3,39 +3,41 @@
 namespace App\Services;
 
 use App\Models\Entidad;
+use App\Models\Establecimiento;
 use App\Models\Factura;
 use App\Models\Timbrado;
 use Carbon\Carbon;
 
 class FacturaJsonBuilder
 {
-    protected $factura, $entidad, $timbrado, $facturaDetalle, $facturaPago;
+    protected $factura, $entidad, $timbrado, $facturaDetalle, $facturaPago, $establecimiento;
 
     public function __construct(Factura $factura)
     {
         $this->factura = $factura;
         $this->entidad = Entidad::find(1);
         $this->timbrado = Timbrado::find($factura->timbrado_id);
+        $this->establecimiento = Establecimiento::find($factura->establecimiento_id);
         $this->facturaDetalle = $factura->facturaDetalle;
         $this->facturaPago = $factura->facturaPago;
     }
 
-    public function build()
+    public function jsonContado()
     {
         $codigoSeguridadAleatorio = random_int(100000000, 999999999);
         $fecha = $this->factura->fecha_factura . ' ' . now()->format('H:i:s');
 
         $json = [
             'fecha' => $fecha,
-            'establecimiento' => $this->timbrado->sucursal,
-            'punto' => $this->timbrado->general,
+            'establecimiento' => $this->establecimiento->sucursal,
+            'punto' => $this->establecimiento->general,
             'numero' => str_pad($this->factura->numero_factura, 7, '0', STR_PAD_LEFT),
             'descripcion' => $this->factura->concepto,
             'tipoDocumento' => $this->factura->tipo_documento_id, // 1 = Factura
             'tipoEmision' => 1,
-            'tipoTransaccion' => $this->factura->tipo_transaccion_id, // te puedo preguntar esto luego
+            'tipoTransaccion' => $this->factura->tipo_transaccion_id,
             'receiptid' => $this->factura->id,
-            'condicionPago' => 1, // asumo contado por ahora
+            'condicionPago' => $this->factura->condicion_pago,
             'moneda' => 'PYG',
             'cambio' => 0,
             'codigoSeguridadAleatorio' => strval($codigoSeguridadAleatorio),
@@ -98,20 +100,6 @@ class FacturaJsonBuilder
         $json['pagos'] = $pagos;
         $json['totalPago'] = $totalPago;
         $json['totalRedondeo'] = 0;
-
-        $datos_cdc = [
-            'ruc' => $this->entidad->ruc,
-            'tipoEmision' => 1,
-            'establecimiento' => $this->timbrado->sucursal,
-            'punto' => $this->timbrado->general,
-            'numero' => str_pad($this->factura->numero_factura, 7, '0', STR_PAD_LEFT),
-            'fecha' => $fecha,
-            'tipoDocumento' => $this->factura->tipo_documento_id,
-            'tipoContribuyente' => $this->entidad->tipo_contribuyente,
-            'codigoSeguridadAleatorio' => strval($codigoSeguridadAleatorio),
-        ];
-
-        $json['cdc'] = $this->generarCDC($datos_cdc);
 
         return $json;
     }

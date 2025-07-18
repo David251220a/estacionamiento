@@ -20,11 +20,13 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained();
             $table->foreignId('vehiculo_id')->constrained();
             $table->foreignId('timbrado_id')->constrained();
+            $table->foreignId('establecimiento_id')->constrained();
             $table->integer('numero_factura')->default(0);
             $table->bigInteger('plan_persona')->default(1);
             $table->date('fecha_factura');
             $table->foreignId('tipo_documento_id')->constrained()->default(1);
             $table->foreignId('tipo_transaccion_id')->constrained()->default(2);
+            $table->integer('condicion_pago')->default(1)->comment('1-CONTADO 2-CREDITO');
             $table->string('concepto');
             $table->decimal('monto_total', 12, 0)->default(0);
             $table->decimal('monto_abonado', 12, 0)->default(0);

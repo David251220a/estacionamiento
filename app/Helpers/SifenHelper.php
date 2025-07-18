@@ -2,6 +2,9 @@
 
 namespace App\Helpers;
 
+use App\Models\Ciudad;
+use App\Models\Departamento;
+use App\Models\Distrito;
 use DateTime;
 
 class SifenHelper
@@ -219,130 +222,6 @@ class SifenHelper
                 break;
 
         }
-    }
-
-    /* datos del establecimiento */
-    public static function direccionEstablecimiento($value, $empresa)
-    {
-        return 'direccion ya tu sabe';
-        // INCLUYE LA DIRECCION NO NECESITAMOS POR QUE VIENE DE LA BD EN LA TABLA ENTIDAD
-        // include 'connect.php';
-        // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['direccion'];
-        // }
-
-        // return $value;
-
-    }
-
-    public static  function numeroCasa($value, $empresa)
-    {
-        return '0';
-        // LO MISMO SE RECUPERA DE LA TABLA ENTIDAD
-
-        // include 'connect.php';
-        // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['num_casa'];
-        // }
-
-        // return $value;
-    }
-
-    public static function codigoDepartamentoEmi($value, $empresa)
-    {
-        return 1;
-        // include 'connect.php';
-        // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['cod_dep'];
-        // }
-
-        // return $value;
-    }
-
-    public static  function descDepartamentoEmi($value, $empresa)
-    {
-        return 'ASUNCION';
-        // include 'connect.php';
-        // $sql = "select d.nombre as nombre from departamentos d
-        // join establecimientos e on e.cod_dep=d.cod
-        // where codigo='$value' and empresa='$empresa' limit 1";
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['nombre'];
-        // }
-
-        // return $value;
-    }
-
-    public static function codigoCiudadEmi($value, $empresa)
-    {
-        return 1;
-        // include 'connect.php';
-        // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['cod_ciudad'];
-        // }
-
-        // return $value;
-    }
-
-    public static function descCiudadEmi($value, $empresa)
-    {
-        return 'ASUNCION';
-        // include 'connect.php';
-        // $sql = "select d.nombre as nombre from ciudades d
-        // join establecimientos e on e.cod_ciudad=d.cod
-        // where codigo='$value' and empresa='$empresa' limit 1";
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['nombre'];
-        // }
-
-        // return $value;
-    }
-
-    public static function codigoDistritoEmi($value, $empresa)
-    {
-        return 1;
-        // include 'connect.php';
-        // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['cod_distri'];
-        // }
-
-        // return $value;
-    }
-
-    public static function descDistritoEmi($value, $empresa)
-    {
-        return 'ASUNCION';
-    }
-
-    public static function telefonoEmi($value, $empresa)
-    {
-        return '05214';
-        // include 'connect.php';
-        // $sql = "select * from establecimientos where codigo='$value' and empresa='$empresa' limit 1";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['telefono'];
-        // }
-
-        // return $value;
     }
 
     public static function MensajeErrorCreandoXML($value)
@@ -848,54 +727,32 @@ class SifenHelper
 
     public static function codigoDepartamento($value)
     {
-        // include 'connect.php';
-        // $sql = "select * from departamentos where cod='$value'";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['nombre'];
-        // }
-        // if (pg_num_rows($exe) >= 1) {
-        //     return $value;
-
-        // } else {
-        //     return '--';
-        // }
-
+        $dep = Departamento::find($value);
+        if($dep){
+            return $dep->descripcion;
+        }else{
+            return '--';
+        }
     }
 
     public static function codigoDistrito($value)
     {
-        // include 'connect.php';
-        // $sql = "select * from distritos where cod='$value'";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['nombre'];
-        // }
-        // if (pg_num_rows($exe) >= 1) {
-        //     return $value;
-
-        // } else {
-        //     return '--';
-        // }
+        $dis = Distrito::find($value);
+        if($dis){
+            return $dis->descripcion;
+        }else{
+            return '--';
+        }
     }
 
     public static function codigoCiudad($value)
     {
-        // include 'connect.php';
-        // $sql = "select * from ciudades where cod='$value'";
-
-        // $exe = pg_query($factPy, $sql);
-        // while ($row = pg_fetch_array($exe)) {
-        //     $value = $row['nombre'];
-        // }
-        // if (pg_num_rows($exe) >= 1) {
-        //     return $value;
-
-        // } else {
-        //     return '--';
-        // }
+        $ciudad = Ciudad::find($value);
+        if($ciudad){
+            return $ciudad->descripcion;
+        } else{
+            return '--';
+        }
     }
 
     public static function tipoDocumentoTransportista($value)

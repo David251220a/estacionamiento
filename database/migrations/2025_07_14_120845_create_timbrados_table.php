@@ -15,15 +15,9 @@ return new class extends Migration
     {
         Schema::create('timbrados', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('entidad_id')->constrained();
             $table->string('timbrado', 100);
             $table->date('fecha_inicio');
-            $table->string('general', 3);
-            $table->string('sucursal', 3);
-            $table->integer('numero_inicial')->default(0);
-            $table->integer('numero_final')->default(0);
-            $table->integer('numero_siguiente')->default(0);
-            $table->string('codigo_set_id' , 100);
-            $table->string('codigo_cliente_set', 250);
             $table->foreignId('estado_id')->constrained();
             $table->timestamps();
         });

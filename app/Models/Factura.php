@@ -35,4 +35,10 @@ class Factura extends Model
     {
         return $this->belongsTo(TipoTransaccion::class, 'tipo_transaccion_id');
     }
+
+    public function establecimiento()
+    {
+        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
+    }
+
 }

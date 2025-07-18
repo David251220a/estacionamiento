@@ -31,6 +31,10 @@ return new class extends Migration
             $table->string('telefono')->nullable();
             $table->bigInteger('distrito_id');
             $table->bigInteger('ciudad_id');
+            $table->string('codigo_set_id' , 100);
+            $table->string('codigo_cliente_set', 250);
+            $table->string('firma', 250);
+            $table->string('pass_firma', 250);
             $table->timestamps();
         });
     }

@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Ciudad;
+use App\Models\Departamento;
+use App\Models\Distrito;
 use App\Models\Estado;
 use App\Models\Sexo;
-use App\Models\Timbrado;
-use App\Models\TipoTransaccion;
 use App\Models\User;
+use App\Models\UsuarioEstablecimiento;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -48,17 +50,18 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        Timbrado::create([
-            'timbrado' => '18043139',
-            'fecha_inicio' => '2025-05-21',
-            'numero_inicial' => 1,
-            'general' => '001',
-            'sucursal' => '001',
-            'numero_final' => 9999999,
-            'numero_siguiente' => 1,
-            'codigo_set_id' => '001',
-            'codigo_cliente_set' => 'B326123F3fd345C3a60F333B2025Ee9E',
-            'estado_id' => 1,
+        Departamento::create([
+            'descripcion' => 'CAPITAL'
+        ]);
+
+        Distrito::create([
+            'departamento_id' => 1,
+            'descripcion' => 'ASUNCION (DISTRITO)'
+        ]);
+
+        Ciudad::create([
+            'distrito_id' => 1,
+            'descripcion' => 'ASUNCION (DISTRITO)'
         ]);
 
         $this->call([
@@ -72,6 +75,9 @@ class DatabaseSeeder extends Seeder
             FormaCobroSeeder::class,
             BancoSeeder::class,
             TipoDocumentoSeeder::class,
+            EstablecimientoSeeder::class,
+            NumeracionSeeder::class,
+            UsuarioEstablecimientoSeeder::class,
         ]);
 
     }

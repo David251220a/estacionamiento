@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Entidad;
 use App\Models\Timbrado;
-use Brick\Math\BigInteger;
 use App\Helpers\SifenHelper;
+use App\Models\Establecimiento;
 use App\Models\Factura;
 use App\Models\Sifen;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
@@ -22,11 +22,11 @@ class FacturaXMLBuilder
 
     public function __construct()
     {
-        $this->entidad = Entidad::find(1); // o recibir por constructor si necesitas flexibilidad
+        $this->entidad = Entidad::find(1);
         $this->sifenHelper = new SifenHelper();
     }
 
-    public function generate(array $json, int $timbrado_id): string
+    public function generate(array $json, int $timbrado_id): array
     {
         try {
 
@@ -34,6 +34,7 @@ class FacturaXMLBuilder
             $datos = $json;
             $timbrado = Timbrado::find($timbrado_id);
             $factura = $this->buscar_factura($datos['receiptid']);
+            $ent_establecimiento = Establecimiento::find($factura->establecimiento_id);
             // PRIMERA PARTE DE CONSTANTES.PHP
             $dNumTim= $timbrado->timbrado;
             $dFeIniT  = $timbrado->fecha_inicio;
@@ -85,7 +86,7 @@ class FacturaXMLBuilder
             if ($fechaDoc < $timbrado->fecha_inicio) {
                 throw new \Exception('ERROR - El número de timbrado no se encuentra vigente a la fecha de emisión del comprobante..');
             }
-            
+
             /*gTimb*/
             $establecimiento = $this->sifenHelper->leftzero($datos['establecimiento'], 3);
             $tipoDocumento = $datos['tipoDocumento'];
@@ -114,15 +115,12 @@ class FacturaXMLBuilder
             $dDirEmi    = $this->entidad->direccion;
             $dNumCas    = $this->entidad->numero_casa;
             $cDepEmi    = $this->entidad->departamento_id;
-            //$dDesDepEmi = $this->entidad->departamentos->descripcion;
-            $dDesDepEmi = 'CAPITAL';
+            $dDesDepEmi = $this->entidad->departamentos->descripcion;
             $cDisEmi    = $this->entidad->distrito_id;
-            //$dDesDisEmi = $this->entidad->distritos->descripcion;
-            $dDesDisEmi = 'ASUNCION (DISTRITO)';
+            $dDesDisEmi = $this->entidad->distritos->descripcion;
             $cCiuEmi    = $this->entidad->ciudad_id;
-            //$dDesCiuEmi = $this->entidad->ciudades->descripcion;
-            $dDesCiuEmi = 'ASUNCION (DISTRITO)';
-            $dTelEmi    = $this->entidad->telefono;
+            $dDesCiuEmi = $this->entidad->ciudades->descripcion;
+            $dTelEmi    = $ent_establecimiento->telefono;
             $remisionAsoc = data_get($datos, 'documentoAsociado.remision', false);
             if ($tipoDocumento == "5" || $remisionAsoc == true) {
                 if (!isset($datos['documentoAsociado']['tipoDocumentoAsoc']) || $datos['documentoAsociado']['tipoDocumentoAsoc'] == "1") {
@@ -830,6 +828,7 @@ class FacturaXMLBuilder
                 $doc = new DOMDocument();
                 $doc->loadXML($xml, true);
                 //$ruta_cert = storage_path('app/keys/' . $p12_file);
+                // CAMBIAR $ruta_cert y $password en SU MOMENTO
                 $ruta_cert = storage_path('app/keys/firma.p12');
                 $pkcs12 = file_get_contents($ruta_cert);
                 $priv_key = null;
@@ -860,7 +859,7 @@ class FacturaXMLBuilder
                         'id_name'   => 'Id',
                         'overwrite' => false,
                     )
-                );                
+                );
 
                 $objDSig->sign($key);
                 $objDSig->add509Cert($cert);
@@ -869,7 +868,7 @@ class FacturaXMLBuilder
 
                 // Establecer el valor del atributo Id en el nodo de firma
                 //no hace falta,
-                //$signatureNode->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:id', 'asd'); 
+                //$signatureNode->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:id', 'asd');
 
                 $objDSig->insertSignature($doc->documentElement);
 
@@ -877,7 +876,7 @@ class FacturaXMLBuilder
                 $relativePathFirma = 'firmados/' . $cdc . '.xml';
                 Storage::disk('public')->put($relativePathFirma, $xml_firmado);
                 $absolutePathFirma = Storage::disk('public')->path($relativePathFirma);
-                //$firmados = 'firmados/' . $cdc . '.xml';	
+                //$firmados = 'firmados/' . $cdc . '.xml';
                 //file_put_contents($absolutePathFirma, $xml_firmado);
                 $doc = new DOMDocument();
                 $doc->load($absolutePathFirma);
@@ -910,13 +909,19 @@ class FacturaXMLBuilder
                 //file_put_contents('../sifen/ekuatia/recibido/'. $cdc . '.xml', $xml_str);
                 Storage::disk('public')->put('enviado/' . $cdc . '.xml', $xml_str);
 
+                $documento_xml = 'enviado/' . $cdc . '.xml';
                 $nombreArchivo = $cdc . '.xml';
             } else {
                 throw new \Exception("No se pudo crear el archivo XML en la ruta: $absolutePath");
             }
             //TERMINA FIRMA
 
-            return $nombreArchivo;
+            return [
+                'cdc' => $nombreArchivo,
+                'archivo_xml' => $documento_xml,
+                'link_qr' => $linkQR,
+                'fecha_firma' => $fechaHoraFirma
+            ];
 
         } catch (\Exception $e) {
             Log::error('Fallo al generar XML: ' . $e->getMessage());

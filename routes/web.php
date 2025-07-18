@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\RegistroDiarioController;
+use App\Http\Controllers\SifenController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -35,4 +36,7 @@ Route::group([
     Route::get('/registro-diario/{registro_diario}/pagar-tarifa', [RegistroDiarioController::class, 'pagar_tarifa'])->name('registro.pagar_tarifa');
 
     Route::get('/factura/{factura}/ver', [FacturaController::class, 'show'])->name('factura.show');
+
+    Route::post('/sifen/{sifen}/enviar', [SifenController::class, 'enviar'])->name('sifen.enviar');
+
 });

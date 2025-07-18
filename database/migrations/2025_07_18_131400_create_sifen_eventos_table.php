@@ -13,11 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('ciudads', function (Blueprint $table) {
+        Schema::create('sifen_eventos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('departamento_id')->constrained();
-            $table->foreignId('distrito_id')->constrained();
-            $table->string('descripcion', 250);
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ciudads');
+        Schema::dropIfExists('sifen_eventos');
     }
 };

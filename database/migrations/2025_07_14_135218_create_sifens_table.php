@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('evento')->nullable();
             $table->unsignedBigInteger('sifen_cod');
             $table->integer('tipo_transaccion');
+            $table->integer('condicion_pago')->default(1);
             $table->string('moneda')->default('PYG');
             $table->string('correo_enviado')->default('N');
             $table->timestamps();
