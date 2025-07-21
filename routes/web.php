@@ -37,6 +37,6 @@ Route::group([
 
     Route::get('/factura/{factura}/ver', [FacturaController::class, 'show'])->name('factura.show');
 
-    Route::post('/sifen/{sifen}/enviar', [SifenController::class, 'enviar'])->name('sifen.enviar');
+    Route::post('/sifen/{sifen}/enviar', [SifenController::class, 'enviar_evento'])->name('sifen.enviar_evento');
 
 });

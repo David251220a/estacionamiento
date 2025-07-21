@@ -15,8 +15,25 @@ class SifenController extends Controller
         $this->sifen = new SifenServices();
     }
 
-    public function enviar(Sifen $sifen)
+    public function enviar_evento(Request $request, Sifen $sifen)
     {
-        return $sifen;
+        $tipo = $request->tipo;
+        $motivo = 'Prueba para anulacion';
+
+        // if($tipo == 1){
+        //     $xml = $this->sifen->inutizacion($sifen, $motivo);
+        // }
+
+        if($tipo == 2){
+            $xml = $this->sifen->cancelacion($sifen, $motivo);
+        }
+
+        // if($tipo == 3){
+        //     $xml = $this->sifen->nominacion($sifen);
+        // }
+
+        $response = $this->sifen->envioEvento($sifen, $xml, 400000, 2);
+
+        return $response;
     }
 }

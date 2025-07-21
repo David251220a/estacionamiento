@@ -917,7 +917,7 @@ class FacturaXMLBuilder
             //TERMINA FIRMA
 
             return [
-                'cdc' => $nombreArchivo,
+                'cdc' => $cdc,
                 'archivo_xml' => $documento_xml,
                 'link_qr' => $linkQR,
                 'fecha_firma' => $fechaHoraFirma
@@ -929,7 +929,6 @@ class FacturaXMLBuilder
         }
 
     }
-
 
     public function buscar_factura($factura_id)
     {
