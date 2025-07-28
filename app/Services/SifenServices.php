@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Entidad;
 use App\Models\Factura;
 use App\Models\Sifen;
 use App\Models\Timbrado;
@@ -11,6 +12,7 @@ use RobRichards\XMLSecLibs\Utils\XPath;
 use DOMDocument;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class SifenServices
 {
@@ -19,7 +21,7 @@ class SifenServices
 
     public function __construct()
     {
-
+        $this->entidad = Entidad::find(1);
     }
 
     public function envioEvento(Sifen $sifen, string $de, int $secuencia, int $tipoEvento)
@@ -42,7 +44,7 @@ class SifenServices
                         </env:Envelope>';
 
             $url = "https://sifen.set.gov.py/de/ws/eventos/evento.wsdl";
-            dd($xml);
+            // dd($xml);
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
@@ -102,7 +104,6 @@ class SifenServices
                     $dEstResNode  = $xml->xpath('//sifen:dEstRes');
                     $dCodResNode  = $xml->xpath('//sifen:dCodRes');
                     $dMsgResNode  = $xml->xpath('//sifen:dMsgRes');
-
                     if (!$dEstResNode || !$dFecProcNode || !$dMsgResNode) {
                         throw new \Exception('Nodos esperados no encontrados en respuesta de SIFEN.');
                     }
@@ -433,6 +434,76 @@ class SifenServices
         $absolutePath = Storage::disk('public')->path($relativePath);
 
         return $absolutePath;
+    }
+
+    public function lotear(Sifen $sifen)
+    {
+        try {
+
+            $xml_content = '<rLoteDE>';
+            $cdc = $sifen->cdc;
+            $absolutePathFirma = Storage::disk('public')->path($sifen->documento_xml);
+            $xml = file_get_contents($absolutePathFirma);
+
+            if (!Storage::disk('public')->exists($sifen->documento_xml)) {
+                throw new \Exception('Archivo XML firmado no encontrado.');
+            }
+
+            $xml      = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+            $xml_content .= $xml;
+            $xml_content .= '</rLoteDE>';
+
+            if (!Storage::disk('public')->exists('zip_xml')) {
+                Storage::disk('public')->makeDirectory('zip_xml');
+            }
+
+            if (!Storage::disk('public')->exists('zip_documento')) {
+                Storage::disk('public')->makeDirectory('zip_documento');
+            }
+
+            $relativePathFirma = 'zip_xml/' . $sifen->secuencia . '_' . $sifen->tipo_doc . '.xml';
+            Storage::disk('public')->put($relativePathFirma, $xml_content);
+            $relativeZipPath = 'zip_documento/' . $sifen->secuencia . '_' . $sifen->tipo_doc . '.zip';
+            $absoluteZipPath = Storage::disk('public')->path($relativeZipPath);
+            $zip = new ZipArchive();
+            $zip_name = 'zip_documento/' . $sifen->secuencia . '_' . $sifen->tipo_doc . '.zip';
+            if ($zip->open($absoluteZipPath, ZipArchive::CREATE) !== true) {
+                throw new \Exception("No se pudo crear el archivo ZIP");
+            }
+            $zip->addFile($absolutePathFirma, basename($relativePathFirma));
+            $zip->close();
+
+            return $absoluteZipPath;
+
+        } catch (\Exception $e) {
+            Log::error('Fallo al generar XML: ' . $e->getMessage());
+            throw new \Exception($e->getMessage());
+        }
+
+    }
+
+    public function lotear_varios()
+    {
+
+    }
+
+    public function enviar_zip(Sifen $sifen)
+    {
+        try {
+            $url = config('facturacion.link_api')[($this->entidad->ambiente == 1) ? 'produccion' : 'test'];
+            dd($url);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/soap+xml'));
+            curl_setopt($ch, CURLOPT_SSLCERT, $cert_file);
+            curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12'); //para usar en formato.p12 en caso de .pem quitar
+            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $cert_password);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        } catch (\Exception $e) {
+            Log::error('Fallo al generar XML: ' . $e->getMessage());
+            throw new \Exception($e->getMessage());
+        }
     }
 
 }

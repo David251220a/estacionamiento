@@ -16,7 +16,7 @@
             <h4>{{$sifen->cdc}}</h4>
             <h4>Sifen Mensaje: {{$sifen->sifen_mensaje}}</h4>
             {{-- <a href="{{route('enviar_evento', $sifen)}}" class="btn btn-success">Crear Xml</a> --}}
-            <form action="{{route('sifen.enviar_evento', $sifen)}}" method="post">
+            <form action="{{route('sifen.enviar_sifen', $sifen)}}" method="post">
                 @csrf
                 <input type="text" name="tipo" value="2">
                 <button type="submit" class="btn btn-success">Enviar Sifen</button>

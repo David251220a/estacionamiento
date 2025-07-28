@@ -20,20 +20,31 @@ class SifenController extends Controller
         $tipo = $request->tipo;
         $motivo = 'Prueba para anulacion';
 
-        // if($tipo == 1){
-        //     $xml = $this->sifen->inutizacion($sifen, $motivo);
-        // }
+        if($tipo == 1){
+            $xml = $this->sifen->inutizacion($sifen, $motivo);
+        }
 
         if($tipo == 2){
             $xml = $this->sifen->cancelacion($sifen, $motivo);
         }
 
-        // if($tipo == 3){
-        //     $xml = $this->sifen->nominacion($sifen);
-        // }
+        if($tipo == 3){
+            $xml = $this->sifen->nominacion($sifen);
+        }
 
         $response = $this->sifen->envioEvento($sifen, $xml, 400000, 2);
 
         return $response;
     }
+
+    public function enviar_sifen(Sifen $sifen)
+    {
+        $ruta_zip = $this->sifen->lotear($sifen);
+        $sifen->update([
+            'documento_zip' => $ruta_zip,
+        ]);
+        $envio = $this->sifen->enviar_zip($sifen);
+        return $sifen;
+    }
+
 }

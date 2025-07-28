@@ -16,10 +16,11 @@ return new class extends Migration
         Schema::create('sifens', function (Blueprint $table) {
             $table->id();
             $table->foreignId('factura_id')->constrained();
-            $table->string('cdc', 250)->unique();
+            $table->text('cdc')->unique();
             $table->integer('tipo_doc')->default(1);
-            $table->string('documento_xml', 250);
-            $table->string('documento_pdf', 250);
+            $table->string('documento_xml');
+            $table->text('documento_pdf');
+            $table->text('documento_zip');
             $table->string('zipeado');
             $table->unsignedBigInteger('secuencia');
             $table->unsignedBigInteger('sifen_num_transaccion');
