@@ -29,6 +29,7 @@ class FacturaController extends Controller
                 'tipo_doc' => $factura->tipo_documento_id,
                 'documento_xml' => $documento['archivo_xml'],
                 'documento_pdf' => 'facturas/' . $documento['cdc'] .'.pdf',
+                'documento_zip' => null,
                 'zipeado' => 'N',
                 'secuencia' => 0,
                 'sifen_num_transaccion' => 0,

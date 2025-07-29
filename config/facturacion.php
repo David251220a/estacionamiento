@@ -18,6 +18,11 @@ return [
         'test' => 'https://sifen-test.set.gov.py/de/ws/consultas/consulta-lote.wsdl',
     ],
 
+    'link_consulta_cdc' => [
+        'produccion' => 'https://sifen.set.gov.py/de/ws/consultas/consulta',
+        'test' => 'https://sifen-test.set.gov.py/de/ws/consultas/consulta',
+    ],
+
     'qr_version' => 'nVersion=150&Id=',
 
     // Carpeta segura para firma digital

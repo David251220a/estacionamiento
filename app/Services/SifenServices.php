@@ -6,10 +6,12 @@ use App\Models\Entidad;
 use App\Models\Factura;
 use App\Models\Sifen;
 use App\Models\Timbrado;
+use Carbon\Carbon;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\Utils\XPath;
 use DOMDocument;
+use DOMXPath;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -449,7 +451,7 @@ class SifenServices
                 throw new \Exception('Archivo XML firmado no encontrado.');
             }
 
-            $xml      = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+            $xml = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
             $xml_content .= $xml;
             $xml_content .= '</rLoteDE>';
 
@@ -490,20 +492,291 @@ class SifenServices
     public function enviar_zip(Sifen $sifen)
     {
         try {
+
+            $xml_content = '<rLoteDE>';
+            $cdc = $sifen->cdc;
+            $absolutePathFirma = Storage::disk('public')->path($sifen->documento_xml);
+            $xml = file_get_contents($absolutePathFirma);
+
+            if (!Storage::disk('public')->exists($sifen->documento_xml)) {
+                throw new \Exception('Archivo XML firmado no encontrado.');
+            }
+            
+            $xml = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+            $xml_content .= $xml;
+            $xml_content .= '</rLoteDE>';
+
+            if (!Storage::disk('public')->exists('zip_xml')) {
+                Storage::disk('public')->makeDirectory('zip_xml');
+            }
+
+            if (!Storage::disk('public')->exists('zip_documento')) {
+                Storage::disk('public')->makeDirectory('zip_documento');
+            }
+
+           $relativePathFirma = 'zip_xml/' . $sifen->secuencia . '_' . $sifen->tipo_doc . '.xml';
+            Storage::disk('public')->put($relativePathFirma, $xml_content);
+
+            $absoluteLoteXml = Storage::disk('public')->path($relativePathFirma);
+
+            $zip_name = 'zip_documento/' . $sifen->secuencia . '_' . $sifen->tipo_doc . '.zip';
+            $absoluteZipPath = Storage::disk('public')->path($zip_name);
+            $relativePath = $zip_name; // ← Este es el valor que necesitás
+            $zip = new ZipArchive();
+            if ($zip->open($absoluteZipPath, ZipArchive::CREATE) !== true) {
+                throw new \Exception("No se pudo crear el archivo ZIP");
+            }
+
+            $zip->addFile($absoluteLoteXml, basename($relativePathFirma));
+            $zip->close();
+            
             $url = config('facturacion.link_api')[($this->entidad->ambiente == 1) ? 'produccion' : 'test'];
-            dd($url);
+
+            $ruta_cert = storage_path('app/keys/firma.p12');
+            $password = 'LqO#9j0E';
+           // dd($url);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            //curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/soap+xml'));
+            curl_setopt($ch, CURLOPT_SSLCERT, $ruta_cert);
+            curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12'); //para usar en formato.p12 en caso de .pem quitar
+            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $password);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            $codSecuencia1 = $sifen->secuencia;
+            $relativePath = $relativePath; // debe ser algo como 'enviado/xxxx.xml'
+            if (!Storage::disk('public')->exists($relativePath)) {
+                throw new \Exception('El archivo no existe: ' . $relativePath);
+            }
+
+            $archivo_comprimido = Storage::disk('public')->get($relativePath);
+            $archivo_comprimido_base64 = base64_encode($archivo_comprimido);
+
+            $xmlenvio = '
+            <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
+                <env:Header/>
+                <env:Body>
+                    <rEnvioLote xmlns="http://ekuatia.set.gov.py/sifen/xsd">
+                        <dId>' . $codSecuencia1 . '</dId>
+                        <xDE>' . $archivo_comprimido_base64 . '</xDE>
+                    </rEnvioLote>
+                </env:Body>
+            </env:Envelope>';
+        
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlenvio);
+            $response = curl_exec($ch);
+            if ($response === false) {
+                throw new \Exception('Error de cURL: ' . curl_error($ch));
+            } else {
+                $xmlResponse = simplexml_load_string($response);
+                $xmls = explode('<?xml', $response);
+                foreach ($xmls as $xml) {
+                    if (empty(trim($xml))) {
+                        continue;
+                    }
+
+                    // Formatear XML
+                    $newDoc = new DOMDocument();
+                    $newDoc->preserveWhiteSpace = false;
+                    $newDoc->formatOutput = true;
+                    $newDoc->loadXML('<?xml' . $xml);
+
+                    // Imprimir XML formateado en pantalla
+                    echo '<pre>' . htmlspecialchars($newDoc->saveXML()) . '</pre>';
+                }
+
+                $xmlResponse->registerXPathNamespace('ns', 'http://ekuatia.set.gov.py/sifen/xsd');
+                $fecha_proceso = (string) $xmlResponse->xpath('//ns:dFecProc')[0];
+                $codigo_res = (string) $xmlResponse->xpath('//ns:dCodRes')[0];
+                $mensaje_res = (string) $xmlResponse->xpath('//ns:dMsgRes')[0];
+                $dProtConsLoteXPath = $xmlResponse->xpath('//ns:dProtConsLote');
+                $dProtConsLote = isset($dProtConsLoteXPath[0]) ? (string) $dProtConsLoteXPath[0] : '';
+                $fecha_original = $fecha_proceso;
+                $fecha_proceso = Carbon::parse($fecha_original)->format('Y-m-d H:i:s');
+                if (!empty($dProtConsLote)) {
+                    $sifen->update([
+                        'sifen_envio_fecha' => $fecha_proceso,
+                        'sifen_envio_codrespuesta' => $codigo_res,
+                        'sifen_envio_msjrespuesta' => $mensaje_res,
+                        'sifen_envio_xml' => $response,
+                        'sifen_num_transaccion' => $dProtConsLote,
+                        'enviado_sifen' => 'Y',
+                        'sifen_estado' => 'ENVIADO'
+                    ]);
+                }
+            }
+
+            curl_close($ch);
+            Storage::put("debug/envio_{$codSecuencia1}.xml", $xmlenvio);
+            Storage::put("debug/respuesta_{$codSecuencia1}.xml", $response);
+            return [true, "Envío exitoso. Código: $codigo_res. Mensaje: " . html_entity_decode($mensaje_res)];
+
+        } catch (\Exception $e) {
+            Log::error('Fallo al generar XML: ' . $e->getMessage());
+            return [false, 'Excepción: ' . $e->getMessage()];
+        }
+    }
+
+    public function consultar(Sifen $sifen)
+    {
+        $lotenum = $sifen->sifen_num_transaccion;
+        $codSecuencia = $sifen->secuencia;
+        $num = $lotenum;
+
+        $ruta_cert = storage_path('app/keys/firma.p12');
+        $password = 'LqO#9j0E';
+
+        $xml2 = '<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
+        <env:Header/>
+        <env:Body>
+            <rEnviConsLoteDe xmlns="http://ekuatia.set.gov.py/sifen/xsd">
+                <dId>' . $codSecuencia . '</dId>
+                <dProtConsLote>' . $num . '</dProtConsLote>
+            </rEnviConsLoteDe>
+        </env:Body>
+        </env:Envelope>';
+
+        $url = config('facturacion.link_consulta')[($this->entidad->ambiente == 1) ? 'produccion' : 'test'];
+        //dd($xml2);
+        $ch = curl_init($url);
+        // Establecer opciones de solicitud cURL
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml2);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/soap+xml'));
+        curl_setopt($ch, CURLOPT_SSLCERT, $ruta_cert);
+        curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12'); //para usar en formato.p12 en caso de .pem quitar
+        curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $password);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+        dd($response);
+        if ($response === false) {
+            echo 'Error de cURL: ' . curl_error($ch);
+        } else {
+            $doc = new DOMDocument();
+            $doc->loadXML($response);
+            $xpath = new DOMXPath($doc);
+
+            // Registrar espacio de nombres
+            $xmlRes = simplexml_load_string($response);
+            $xmlRes->registerXPathNamespace('ns', 'http://ekuatia.set.gov.py/sifen/xsd');
+
+            // Acceder a los valores de los elementos y guardarlos en variables
+            $fecha_proceso = (string) $xmlRes->xpath('//ns:dFecProc')[0];
+            $codigo_res    = (string) $xmlRes->xpath('//ns:dCodResLot')[0];
+            $mensaje_res   = (string) $xmlRes->xpath('//ns:dMsgResLot')[0];
+
+            $xmls = explode('<?xml', $response);
+            
+            foreach ($xmls as $xml) {
+                if (empty(trim($xml))) {
+                    continue;
+                }
+
+                // Formatear XML
+                $newDoc = new DOMDocument();
+                $newDoc->preserveWhiteSpace = false;
+                $newDoc->formatOutput       = true;
+                $newDoc->loadXML('<?xml' . $xml);
+
+                // Imprimir XML formateado en pantalla
+                echo '<pre>' . htmlspecialchars($newDoc->saveXML()) . '</pre>';
+            }
+            //ACTUALIZA EL MENSAJE DEL LOTE CONTROL
+            //$updateLote = "UPDATE lote_control SET sifen_consulta_xml='$response', sifen_consulta_fecha='$fecha_proceso', sifen_consulta_codrespuesta='$mensaje_res' WHERE empresa='$_idEmpresa' and lote_num_sifen='$num'";
+            //$result     = pg_query($factPy, $updateLote);
+
+            $xpath->registerNamespace('ns2', 'http://ekuatia.set.gov.py/sifen/xsd');
+            $gResProcLoteList = $xpath->query('//ns2:gResProcLote');
+
+            foreach ($gResProcLoteList as $gResProcLote) {
+                // Extraer el id y dMsgRes
+                $id = $xpath->evaluate('string(./ns2:id)', $gResProcLote); //cdc
+
+                $dEstRes  = $xpath->evaluate('string(./ns2:dEstRes)', $gResProcLote); // estado
+                $dCodRes  = $xpath->evaluate('string(./ns2:gResProc/ns2:dCodRes)', $gResProcLote); //dCodRes
+                $dMsgRes  = $xpath->evaluate('string(./ns2:gResProc/ns2:dMsgRes)', $gResProcLote); //mensaje
+                $dProtAut = $xpath->evaluate('string(./ns2:dProtAut)', $gResProcLote); //numero transaccion sifen
+                $dMsgRes  = str_replace("'", "\"", $dMsgRes);
+                if (empty($dProtAut)) {
+                    $dProtAut = '0';
+                }
+
+                $sifen->update([
+                    //'sifen_num_transaccion' => $dProtAut,
+                    'sifen_cod' => $dCodRes,
+                    'sifen_estado' => $dEstRes,
+                    'sifen_mensaje' => $dMsgRes
+                ]);
+                
+            }
+        }
+
+        curl_close($ch);
+    }
+
+    public function consultar_cdc(Sifen $sifen)
+    {
+
+        try {
+            
+            $ruta_cert = storage_path('app/keys/firma.p12');
+            $password = 'LqO#9j0E';
+            $url = config('facturacion.link_consulta_cdc')[($this->entidad->ambiente == 1) ? 'produccion' : 'test'];
+
+            $cdc = $sifen->cdc;
+
+            $xml = <<<XML
+            <?xml version="1.0" encoding="UTF-8"?>
+            <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
+            <env:Header/>
+            <env:Body>
+                <ns1:rEnviConsDe xmlns:ns1="http://ekuatia.set.gov.py/sifen/xsd">
+                <ns1:IdConsDe>$cdc</ns1:IdConsDe>
+                </ns1:rEnviConsDe>
+            </env:Body>
+            </env:Envelope>
+            XML;
+            dd($xml);
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/soap+xml'));
-            curl_setopt($ch, CURLOPT_SSLCERT, $cert_file);
-            curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12'); //para usar en formato.p12 en caso de .pem quitar
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $cert_password);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/soap+xml']);
+            curl_setopt($ch, CURLOPT_SSLCERT, $ruta_cert);
+            curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12');
+            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $password);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                throw new \Exception("Error al consultar documento por CDC");
+            }
+
+            // Parsear la respuesta
+
+            $xmlResponse = simplexml_load_string($response);
+            $xmlResponse->registerXPathNamespace('ns', 'http://ekuatia.set.gov.py/sifen/xsd');
+
+            $fecha   = (string) ($xmlResponse->xpath('//ns:dFecProc')[0] ?? '');
+            $estado  = (string) ($xmlResponse->xpath('//ns:dEstRes')[0] ?? '');
+            $codigo  = (string) ($xmlResponse->xpath('//ns:gResProc/ns:dCodRes')[0] ?? '');
+            $mensaje = (string) ($xmlResponse->xpath('//ns:gResProc/ns:dMsgRes')[0] ?? '');
+
+            return [
+                'fecha'   => $fecha,
+                'estado'  => $estado,
+                'codigo'  => $codigo,
+                'mensaje' => html_entity_decode($mensaje),
+                'raw'     => $response,
+            ];
         } catch (\Exception $e) {
             Log::error('Fallo al generar XML: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
         }
+
     }
 
 }
