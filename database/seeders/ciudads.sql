@@ -3,7 +3,7 @@
 INSERT INTO `ciudads`
   (`id`, `distrito_id`, `descripcion`)
 VALUES 
-  (1, 1, 'ASUNCION (DISTRITO)'),
+  --(1, 1, 'ASUNCION (DISTRITO)'),
   (3, 2, 'CONCEPCION (MUNICIPIO)'),
   (4, 2, 'ABASTO CUE'),
   (5, 2, 'AGUA FRIA'),

@@ -3,7 +3,7 @@
 INSERT INTO `departamentos`
   (`id`, `descripcion`)
 VALUES 
-  (1, 'CAPITAL'),
+--  (1, 'CAPITAL'),
   (2, 'CONCEPCION'),
   (3, 'SAN PEDRO'),
   (4, 'CORDILLERA'),

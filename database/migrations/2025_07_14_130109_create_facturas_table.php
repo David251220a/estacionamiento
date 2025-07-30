@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('persona_id')->constrained();
             $table->foreignId('registro_diario_id')->constrained();
             $table->foreignId('plan_id')->constrained();
-            $table->foreignId('vehiculo_id')->constrained();
+            //$table->foreignId('vehiculo_id')->constrained();
             $table->foreignId('timbrado_id')->constrained();
             $table->foreignId('establecimiento_id')->constrained();
             $table->integer('numero_factura')->default(0);

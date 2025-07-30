@@ -7,7 +7,7 @@
 
 @section('content')
 
-    @livewire('registro.registro-create')
+    @livewire('ingreso.ingreso-create')
 
 @endsection
 

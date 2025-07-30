@@ -9,7 +9,7 @@
 
 @section('content')
 
-    @livewire('registro.registro-pagar', ['registro_diario' => $registro_diario], key($registro_diario->id))
+    @livewire('ingreso.ingreso-cobro', ['registro_diario' => $registro_diario], key($registro_diario->id))
 
 @endsection
 
