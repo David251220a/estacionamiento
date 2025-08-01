@@ -1,0 +1,48 @@
+body{
+    /* border: 1px solid black; */
+    font-size: 14px;
+    margin-left: -25px;
+    margin-right: -25px;
+}
+
+.cont-cabezera{
+    width: 100%;
+    /* margin-bottom: 20px; */
+    /* border: 1px solid red; */
+}
+
+.cont-cabezera .img-cabezera {
+    width: 100%;
+}
+
+.cont-cabezera p {
+    text-align: right;
+    vertical-align: top;
+}
+
+.datos {
+    width: 100%;
+    font-size: 13px;
+    /* border: 1px solid red; */
+}
+
+table {
+    width: 100%;
+}
+
+table tfoot{
+    background: rgb(185, 181, 181);
+}
+
+h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    /* border: 1px solid red; */
+}
+
+.detalle {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: -10px;
+}
+

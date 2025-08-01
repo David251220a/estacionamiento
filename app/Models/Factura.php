@@ -41,4 +41,20 @@ class Factura extends Model
         return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
     }
 
+
+    public function registroDiario()
+    {
+        return  $this->belongsTo(RegistroDiario::class, 'registro_diario_id');
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    public function PersonaPlan()
+    {
+        return $this->belongsTo(PlanPersona::class, 'plan_persona');
+    }
+
 }

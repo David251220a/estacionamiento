@@ -8,8 +8,8 @@
 
                     <nav class="breadcrumb-one" aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="javascript:void(0);">{{(Route::currentRouteName())}}</a></li>
-                            <li class="breadcrumb-item active" aria-current="page"><span>Sales</span></li>
+                            {{-- <li class="breadcrumb-item"><a href="javascript:void(0);">{{(Route::currentRouteName())}}</a></li> --}}
+                            {{-- <li class="breadcrumb-item active" aria-current="page"><span></span></li> --}}
                         </ol>
                     </nav>
 

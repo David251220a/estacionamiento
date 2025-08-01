@@ -39,14 +39,9 @@ class SifenController extends Controller
 
     public function enviar_sifen(Sifen $sifen)
     {
-        //$ruta_zip = $this->sifen->lotear($sifen);
-        //$sifen->update([
-        //    'documento_zip' => $ruta_zip,
-        //]);
-        //return $this->sifen->enviar_zip($sifen);
-        return $this->sifen->consultar($sifen);
-        //return $this->sifen->consultar_cdc($sifen);
-        return $sifen;
+        $factura = $sifen->factura;
+        $registro_diario = $factura->registroDiario;
+        return view('sifen.cobrado', compact('registro_diario', 'factura'));
     }
 
 }

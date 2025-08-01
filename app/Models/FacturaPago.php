@@ -20,4 +20,9 @@ class FacturaPago extends Model
     {
         return $this->belongsTo(Banco::class, 'banco_id');
     }
+
+    public function cobroTipo()
+    {
+        return $this->belongsTo(FormaCobro::class, 'forma_cobro_id');
+    }
 }

@@ -121,30 +121,6 @@ class SifenServices
                         'fecha'  => $dFecProc,
                     ];
                     return json_encode($data);
-                    // $dFecProc = (string) $xml->children('env', true)->Body->children('ns2', true)->rRetEnviEventoDe->dFecProc;
-                    // $dEstRes  = (string) $xml->children('env', true)->Body->children('ns2', true)->rRetEnviEventoDe->gResProcEVe->dEstRes;
-                    // $dCodRes  = (string) $xml->children('env', true)->Body->children('ns2', true)->rRetEnviEventoDe->gResProcEVe->gResProc->dCodRes;
-                    // $dMsgRes  = (string) $xml->children('env', true)->Body->children('ns2', true)->rRetEnviEventoDe->gResProcEVe->gResProc->dMsgRes;
-
-                    // if ($dEstRes == 'Rechazado') {
-
-                    //     $data = array(
-                    //         "status" => false,
-                    //         "code"   => "$dMsgRes",
-                    //         "fecha"  => "$dFecProc",
-                    //     );
-                    //     $json = json_encode($data);
-                    //     return $json;
-                    // } else {
-                    //     $data = array(
-                    //         "status" => true,
-                    //         "code"   => "$dMsgRes",
-                    //         "fecha"  => "$dFecProc",
-
-                    //     );
-                    //     $json = json_encode($data);
-                    //     return $json;
-                    // }
 
                 }
 
@@ -501,7 +477,7 @@ class SifenServices
             if (!Storage::disk('public')->exists($sifen->documento_xml)) {
                 throw new \Exception('Archivo XML firmado no encontrado.');
             }
-            
+
             $xml = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
             $xml_content .= $xml;
             $xml_content .= '</rLoteDE>';
@@ -529,7 +505,7 @@ class SifenServices
 
             $zip->addFile($absoluteLoteXml, basename($relativePathFirma));
             $zip->close();
-            
+
             $url = config('facturacion.link_api')[($this->entidad->ambiente == 1) ? 'produccion' : 'test'];
 
             $ruta_cert = storage_path('app/keys/firma.p12');
@@ -563,7 +539,7 @@ class SifenServices
                     </rEnvioLote>
                 </env:Body>
             </env:Envelope>';
-        
+
             curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlenvio);
             $response = curl_exec($ch);
             if ($response === false) {
@@ -668,7 +644,7 @@ class SifenServices
             $mensaje_res   = (string) $xmlRes->xpath('//ns:dMsgResLot')[0];
 
             $xmls = explode('<?xml', $response);
-            
+
             foreach ($xmls as $xml) {
                 if (empty(trim($xml))) {
                     continue;
@@ -709,7 +685,7 @@ class SifenServices
                     'sifen_estado' => $dEstRes,
                     'sifen_mensaje' => $dMsgRes
                 ]);
-                
+
             }
         }
 
@@ -720,7 +696,7 @@ class SifenServices
     {
 
         try {
-            
+
             $ruta_cert = storage_path('app/keys/firma.p12');
             $password = 'LqO#9j0E';
             $url = config('facturacion.link_consulta_cdc')[($this->entidad->ambiente == 1) ? 'produccion' : 'test'];

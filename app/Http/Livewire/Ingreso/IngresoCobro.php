@@ -256,7 +256,7 @@ class IngresoCobro extends Component
 
         if (empty($documento)){
            $this->emit('mensaje_error', 'El numero de documento no puede ser vacio.');
-            return false; 
+            return false;
         }
 
         if($documento == 0){
@@ -266,24 +266,24 @@ class IngresoCobro extends Component
 
         if (empty($this->nombre_crear)){
            $this->emit('mensaje_error', 'El nomrbe de la persona no puede ser vacio.');
-            return false; 
+            return false;
         }
 
         if (empty($this->apellido_crear)){
            $this->emit('mensaje_error', 'El nomrbe de la persona no puede ser vacio.');
-            return false; 
+            return false;
         }
 
         if (empty($this->email)){
            $this->emit('mensaje_error', 'El nomrbe de la persona no puede ser vacio.');
-            return false; 
+            return false;
         }
 
         if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
             $this->emit('mensaje_error', 'El correo no es válido.');
             return false;
         }
-        
+
         try{
 
             if($this->persona == null){
@@ -311,7 +311,7 @@ class IngresoCobro extends Component
                     'ruc' => $this->ruc,
                     'usuario_modificacion' => 1
                 ]);
-                
+
                 $this->persona = $persona;
 
             }
@@ -324,7 +324,7 @@ class IngresoCobro extends Component
                 'color_id' => $this->color_id,
                 'chapa' => $this->nro_chapa
             ]);
-            
+
 
             $this->boton_agregar = 'block';
             $this->boton_cancelar = 'none';
@@ -347,7 +347,7 @@ class IngresoCobro extends Component
         $this->validar_suma_dos = true;
         $this->updatedFormaPagoIdDos($this->forma_pago_id_dos);
     }
-    
+
     public function quitar_forma_cobro(){
         $this->ver_forma_pago_dos = 'none';
         $this->ver_boton_agregar_forma_pago = 'block';
@@ -362,12 +362,12 @@ class IngresoCobro extends Component
     public function guardar()
     {
         $this->procesando = true;
-        
+
         $total_abonado = str_replace('.', '', $this->total_general_abonado);
         $total_a_pagar = str_replace('.', '', $this->total_a_pagar);
         $monto_primero = str_replace('.', '', $this->monto_abonado);
         $monto_segundo = str_replace('.', '', $this->monto_abonado_dos);
-        
+
         if (empty($monto_primero)){
             $this->emit('mensaje_error', 'El monto abonado de la primera forma de pago no debe ser vacio.');
             $this->procesando = false;
@@ -393,7 +393,7 @@ class IngresoCobro extends Component
                 return false;
             }
         }
-        
+
 
         if ($total_abonado < $total_a_pagar){
             $this->emit('mensaje_error', 'El total pagado no puede ser menor al total a pagar.');
@@ -417,9 +417,16 @@ class IngresoCobro extends Component
             }
         }
 
+        $factura_cobrado = Factura::where('registro_diario_id', $this->registro_diario->id)
+        ->where('estado_id', 1)
+        ->exists();
+
+        if ($factura_cobrado){
+            return redirect()->route('')->withErrors('El pago por el servicio ya se encuentra en estado pagado.');
+        }
+
         try{
             DB::transaction(function () {
-
                 $fecha = Carbon::now()->toDateString();
                 $_total_abonado = str_replace('.', '', $this->total_general_abonado);
                 $_total_a_pagar = str_replace('.', '', $this->total_a_pagar);
@@ -448,7 +455,8 @@ class IngresoCobro extends Component
                     throw new \Exception('No se encontró un timbrado activo.');
                 }
 
-                $numero_factura = $numeracion->numero_siguiente;
+                // $numero_factura = $numeracion->numero_siguiente;
+                $numero_factura = 0;
                 $plan_persona = 0;
 
                 if($this->plan_id <> 1){
@@ -485,13 +493,19 @@ class IngresoCobro extends Component
                 ]);
 
                 $this->factura = $factura;
+                $detalleCantidad = 0;
+                if ($this->plan_id == 1){
+                    $detalleCantidad = $this->hora_computada;
+                } else {
+                    $detalleCantidad = $this->cantidad;
+                }
 
                 FacturaDetalle::create([
                     'factura_id' => $factura->id,
                     'plan_id' => $this->plan_id,
                     'plan_persona' => $plan_persona,
                     'monto' => $_total_a_pagar,
-                    'cantidad' => 1,
+                    'cantidad' => $detalleCantidad,
                     'hora_ingreso' => $this->registro_diario->hora_ingreso,
                     'hora_salida' => $hora_salida,
                 ]);
@@ -516,6 +530,7 @@ class IngresoCobro extends Component
 
                 $registro->update([
                     'facturado' => 1,
+                    'hora_salida' => $hora_salida,
                     'user_id' => auth()->user()->id,
                 ]);
 

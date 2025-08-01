@@ -3,13 +3,14 @@
         <div class="widget-content widget-content-area">
 
             <h4 class="font-bold mb-3">PAGO TARIFA</h4>
+            <h4 class="font-bold mb-3">TICKET:  {{str_pad($registro_diario->ticket, 5, '0', STR_PAD_LEFT)}}/{{$registro_diario->anio}}</h4>
             <h6 class="font-bold mb-1">DATOS DE LA PERSONA</h6>
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12">
                     <div class="form-row mb-2">
                         <div class="form-group col-md-3">
                             <label for="documento_crear">Documento</label>
-                            <input type="text" wire:model.defer='documento_crear' wire:blur='verificarDocumento' class="form-control text-right bg-white text-dark" 
+                            <input type="text" wire:model.defer='documento_crear' wire:blur='verificarDocumento' class="form-control text-right bg-white text-dark"
                             {{ ($modicar_persona == false ? 'readonly' : '' )}} onkeyup="punto_decimal(this)">
                         </div>
                         <div class="form-group col-md-3">
@@ -78,7 +79,7 @@
 
                 </div>
             </div>
-            
+
             <h6 class="font-bold mb-1">CALCULO TARIFA</h6>
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12">
@@ -189,14 +190,14 @@
                             <label for="total_general_abonado">Total General Abonado</label>
                             <input type="text" class="form-control bg-white text-right text-dark" value="{{$total_general_abonado}}" readonly>
                         </div>
-                        
+
                         <div class="form-group col-md-2 col-sm-12" style="display: {{$ver_vuelto}}">
                             <label for="vuelto">Vuelto</label>
                             <input type="text" class="form-control text-right bg-white text-dark" value="{{number_format($vuelto, 0, ".", ".")}}" readonly>
                         </div>
 
                     </div>
-                
+
                     <button type="button" class="btn btn-primary" wire:click="calcular(15000)">
                         15.000
                     </button>
@@ -220,7 +221,7 @@
                     <button type="button" class="btn btn-primary" wire:click="calcular(200000)">
                         200.000
                     </button>
-                    
+
                 </div>
             </div>
 

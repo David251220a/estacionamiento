@@ -30,4 +30,14 @@ class RegistroDiario extends Model
     {
         return $this->belongsTo(Color::class, 'color_id');
     }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
+
+    public function factura()
+    {
+        return $this->hasOne(Factura::class, 'registro_diario_id')->where('estado_id', 1);
+    }
 }

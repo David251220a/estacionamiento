@@ -45,6 +45,17 @@
             </a>
         </li>
 
+        <li class="menu">
+            <a href="{{route('consulta.pagos')}}" aria-expanded="false" class="dropdown-toggle"
+                @if(Str::startsWith(Route::currentRouteName(), 'consulta.pagos')) data-active="true" @endif
+            >
+                <div class="">
+                    <i class="fas fa-solid fa-eye mr-3"></i>
+                    <span>Consultas</span>
+                </div>
+            </a>
+        </li>
+
         {{-- <li class="menu">
             <a href="{{route('cobro.registro')}}" aria-expanded="false" class="dropdown-toggle" @if(Str::startsWith(Route::currentRouteName(), 'cobro.registro')) data-active="true" @endif>
                 <div class="">

@@ -16,7 +16,7 @@ class IngresoCreate extends Component
 {
     public $colores, $modelos, $marcas, $planes;
     public $plan_id_registrar, $hora_ingreso, $marca_id_registrar, $modelo_id_registrar, $color_id_registrar
-    , $chapa_registrar, $procesando;
+    , $chapa_registrar, $procesando, $registro_diario;
 
     public function mount()
     {
@@ -58,7 +58,7 @@ class IngresoCreate extends Component
                 $ticket = $ultimoTicket ? $ultimoTicket + 1 : 1;
                 $persona = Persona::find(1);
 
-                RegistroDiario::create([
+                $this->registro_diario = RegistroDiario::create([
                     'persona_id' => $persona->id,
                     'plan_id' => $this->plan_id_registrar,
                     'marca_id' => $this->marca_id_registrar,
@@ -79,8 +79,8 @@ class IngresoCreate extends Component
                 ]);
             });
 
-            return redirect()->route('registro.index')->with('message', 'Registro creado con éxito');
-            
+            return redirect()->route('registro.show', $this->registro_diario)->with('message', 'Registro creado con éxito');
+
         } catch (\Exception $e) {
             $this->emit('mensaje_error', $e->getMessage());
             $this->procesando = false;

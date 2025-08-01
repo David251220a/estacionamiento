@@ -27,7 +27,7 @@
                 </div>
             </div>
 
-            <div class="row ">
+            <div class="row">
                 <div  class="col-xl-12 col-md-12 col-sm-12 col-12">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover table-striped table-checkable table-highlight-head mb-4">
@@ -39,6 +39,7 @@
                                     <th class="">Plan Activo</th>
                                     <th class="">Hora Ingreso</th>
                                     <th class="">Tiempo Transcurrido</th>
+                                    <th class="">Ticket</th>
                                     <th class="">Pagado?</th>
                                     <th class="text-center">Opciones</th>
                                 </tr>
@@ -74,7 +75,10 @@
                                             {{ $diferencia->h }}h {{ $diferencia->i }}m
                                         </td>
                                         <td>
-                                            @if ($item->factura == 1)
+                                            {{str_pad($item->ticket, 5, '0', STR_PAD_LEFT)}}/{{$item->anio}}
+                                        </td>
+                                        <td>
+                                            @if ($item->facturado == 1)
                                                 <span class="badge outline-badge-info shadow-none">Pagado</span>
                                             @else
                                                 <span class="badge badge-danger">No Pagado</span>
@@ -83,7 +87,7 @@
                                         <td class="text-center">
                                             <ul class="table-controls">
 
-                                                @if ($item->factura == 0)
+                                                @if ($item->facturado == 0)
                                                     <li class="mr-2">
                                                         <a href="{{route('registro.pagar_tarifa', $item)}}" data-toggle="tooltip" data-placement="top" title="Cobrar">
                                                             <i class="fa-solid fa-cash-register" style="color: green; font-size: 23px"></i>
@@ -92,9 +96,16 @@
                                                 @endif
 
                                                 <li class="mr-2">
-                                                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Imprimir">
-                                                        <i class="fa-solid fa-print" style="font-size: 23px"></i>
-                                                    </a>
+                                                    @if ($item->facturado == 0)
+                                                        <a href="{{route('registro.imprimir', $item)}}" data-toggle="tooltip" data-placement="top" title="Imprimir" target="__blank">
+                                                            <i class="fa-solid fa-print" style="font-size: 23px"></i>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{route('factura.imprimir', $item->factura->id)}}" data-toggle="tooltip" data-placement="top" title="Imprimir" target="__blank">
+                                                            <i class="fa-solid fa-print" style="font-size: 23px"></i>
+                                                        </a>
+                                                    @endif
+
                                                 </li>
                                                 {{-- <li>
                                                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Delete">

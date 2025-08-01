@@ -13,7 +13,9 @@
         "laravel/tinker": "^2.7",
         "laravel/ui": "^4.6",
         "livewire/livewire": "^2.12",
+        "picqer/php-barcode-generator": "^2.4",
         "robrichards/xmlseclibs": "^3.1",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.20"
     },
     "require-dev": {
