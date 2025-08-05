@@ -6,8 +6,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
         <title>CJPPM | Caja de Jubilaciones y Pensional </title>
-        <link rel="icon" type="image/x-icon" href="{{asset('storage/logo_titulo.png')}}"/>
-        <link rel="stylesheet" href="{{ asset('css/pagos.css') }}">
+        <link rel="icon" type="image/x-icon" href="{{public_path('storage/logo_titulo.png')}}"/>
+        <link rel="stylesheet" href="{{ public_path('css/pagos.css') }}">
     </head>
 
     <body>
@@ -17,7 +17,7 @@
             <table style="margin-bottom: 16px; width: 100%">
                 <tr>
                     <td>
-                        <img class="img-cabezera" src="{{ asset('storage/logo_caja.png')}}" alt="" height="50">
+                        <img class="img-cabezera" src="{{ public_path('storage/logo_caja.png')}}" alt="" height="50">
                     </td>
                     <td style="text-align: center; font-weight:bold; font-size: 15px">
 

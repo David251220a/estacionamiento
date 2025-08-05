@@ -17,18 +17,36 @@
         </div>
 
         <div>
-            <h3>Ingreso de Vehiculo</h3>
+            <h3>Ticket de Estacionamiento</h3>
         </div>
 
         <div style="margin-top: 10px">
             <table>
                 <tbody>
                     <tr>
-                        <td>Fecha: {{date('d/m/Y', StrToTime($registro_diario->fecha))}}</td>
+                        <td>Fecha: {{$registro_diario->fecha}} | {{$plan->descripcion}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Fecha Desde {{date('d/m/Y', StrToTime($PersonaPlan->fecha_inicio))}}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Fecha Hasta {{date('d/m/Y', StrToTime($PersonaPlan->fecha_fin))}}
+                        </td>
                     </tr>
                     <tr>
-                        <td>Hora Ingreso: {{$registro_diario->hora_ingreso}}</td>
+                        <td>
+                            Cant. {{$plan->descripcion}}: {{$PersonaPlan->cantidad}}
+                        </td>
                     </tr>
+                </tbody>
+            </table>
+            <table>
+                <tbody>
                     <tr>
                         <td style="font-weight: bold; text-align: center; font-size: 25px">
                             Ticket: {{str_pad($registro_diario->ticket, 5, '0', STR_PAD_LEFT)}}/{{$registro_diario->anio}}
@@ -40,7 +58,6 @@
                         </td>
                     </tr>
                 </tbody>
-
             </table>
 
         </div>

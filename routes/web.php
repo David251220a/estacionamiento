@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\FacturaController;
 use App\Http\Controllers\Limpiar;
+use App\Http\Controllers\PlanPersonaController;
 use App\Http\Controllers\RegistroDiarioController;
 use App\Http\Controllers\SifenController;
 use Illuminate\Support\Facades\Auth;
@@ -50,5 +51,11 @@ Route::group([
 
     Route::get('/consulta/pagos', [ConsultaController::class, 'pagos'])->name('consulta.pagos');
     Route::get('/consulta/reporte/{fechaDesde}/{fechaHasta}/{formaCobro}/imprimir', [ConsultaController::class, 'pagos_imprimir'])->name('consulta.pagos_imprimir');
+
+    Route::get('/plan/crear-plan', [PlanPersonaController::class, 'create'])->name('planpersona.create');
+    Route::get('/plan/{registro_diario}/buscar-plan', [PlanPersonaController::class, 'show'])->name('planpersona.show');
+    Route::get('/plan/{registro_diario}/imprimir-plan', [PlanPersonaController::class, 'imprimir'])->name('planpersona.imprimir');
+    Route::get('/plan', [PlanPersonaController::class, 'index'])->name('planpersona.index');
+    Route::get('/plan/{plan_persona}/editar-plan', [PlanPersonaController::class, 'edit'])->name('planpersona.edit');
 
 });

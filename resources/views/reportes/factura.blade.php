@@ -6,14 +6,14 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
         <title>CJPPM | Caja de Jubilaciones y Pensional </title>
-        <link rel="icon" type="image/x-icon" href="{{asset('storage/logo_titulo.png')}}"/>
-        <link rel="stylesheet" href="{{ asset('css/ticket.css') }}">
+        <link rel="icon" type="image/x-icon" href="{{public_path('storage/logo_titulo.png')}}"/>
+        <link rel="stylesheet" href="{{ public_path('css/ticket.css') }}">
     </head>
 
     <body>
 
         <div class="cont-cabezera">
-            <img class="img-cabezera" src="{{ asset('storage/logo_caja.png')}}" alt="">
+            <img class="img-cabezera" src="{{ public_path('storage/logo_caja.png')}}" alt="">
         </div>
 
         <div>
@@ -24,7 +24,7 @@
             <table>
                 <tbody>
                     <tr>
-                        <td>Fecha: {{$registro_diario->fecha}} | {{$factura->plan->descripcion}}</td>
+                        <td>Fecha: {{date('d/m/Y', StrToTime($registro_diario->fecha))}} | {{$factura->plan->descripcion}}</td>
                     </tr>
                     <tr>
                         <td>Hora Entrada: {{$registro_diario->hora_ingreso}}</td>
@@ -39,13 +39,13 @@
                     @else
                         <tr>
                             <td>
-                                Fecha Desde {{$factura->PersonaPlan->fecha_inicio}}
+                                Fecha Desde {{date('d/m/Y', StrToTime($factura->PersonaPlan->fecha_inicio))}}
                             </td>
                         </tr>
 
                         <tr>
                             <td>
-                                Fecha Hasta {{$factura->PersonaPlan->fecha_fin}}
+                                Fecha Hasta {{date('d/m/Y', StrToTime($factura->PersonaPlan->fecha_fin))}}
                             </td>
                         </tr>
                         <tr>

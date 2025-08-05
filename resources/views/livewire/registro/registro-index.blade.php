@@ -24,6 +24,7 @@
             <div class="row">
                 <div class="col-lg-8 col-md-8 col-sm-8 ">
                     <a href="{{route('registro.create')}}" class="btn btn-outline-success mb-2">Agregar</a>
+                    <a href="{{route('planpersona.create')}}" class="btn btn-outline-primary mb-2">Crear Plan</a>
                 </div>
             </div>
 
@@ -93,6 +94,12 @@
                                                             <i class="fa-solid fa-cash-register" style="color: green; font-size: 23px"></i>
                                                         </a>
                                                     </li>
+
+                                                    <li class="mr-2">
+                                                        <a href="{{route('planpersona.show', $item)}}" data-toggle="tooltip" data-placement="top" title="Buscar Plan">
+                                                            <i class="fas fa-spinner" style="color: rgb(14, 185, 228); font-size: 23px"></i>
+                                                        </a>
+                                                    </li>
                                                 @endif
 
                                                 <li class="mr-2">
@@ -101,9 +108,15 @@
                                                             <i class="fa-solid fa-print" style="font-size: 23px"></i>
                                                         </a>
                                                     @else
-                                                        <a href="{{route('factura.imprimir', $item->factura->id)}}" data-toggle="tooltip" data-placement="top" title="Imprimir" target="__blank">
-                                                            <i class="fa-solid fa-print" style="font-size: 23px"></i>
-                                                        </a>
+                                                        @if ($item->plan_activo == 0)
+                                                            <a href="{{route('factura.imprimir', $item->factura->id)}}" data-toggle="tooltip" data-placement="top" title="Imprimir" target="__blank">
+                                                                <i class="fa-solid fa-print" style="font-size: 23px"></i>
+                                                            </a>
+                                                        @else
+                                                            <a href="{{route('planpersona.imprimir', $item->id)}}" data-toggle="tooltip" data-placement="top" title="Imprimir" target="__blank">
+                                                                <i class="fa-solid fa-print" style="font-size: 23px"></i>
+                                                            </a>
+                                                        @endif
                                                     @endif
 
                                                 </li>

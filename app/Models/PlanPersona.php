@@ -10,4 +10,15 @@ class PlanPersona extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class, 'persona_id');
+    }
+
 }

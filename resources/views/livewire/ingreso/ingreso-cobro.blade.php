@@ -198,8 +198,8 @@
 
                     </div>
 
-                    <button type="button" class="btn btn-primary" wire:click="calcular(15000)">
-                        15.000
+                    <button type="button" class="btn btn-primary" wire:click="calcular(10000)">
+                        10.000
                     </button>
 
                     <button type="button" class="btn btn-primary" wire:click="calcular(20000)">
@@ -220,6 +220,10 @@
 
                     <button type="button" class="btn btn-primary" wire:click="calcular(200000)">
                         200.000
+                    </button>
+
+                    <button type="button" class="btn btn-primary" wire:click="calcular(300000)">
+                        300.000
                     </button>
 
                 </div>

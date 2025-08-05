@@ -56,6 +56,17 @@
             </a>
         </li>
 
+        <li class="menu">
+            <a href="{{route('planpersona.index')}}" aria-expanded="false" class="dropdown-toggle"
+                @if(Str::startsWith(Route::currentRouteName(), 'planpersona.index')) data-active="true" @endif
+            >
+                <div class="">
+                    <i class="fas fa-user-plus mr-3"></i>
+                    <span>Plan Persona</span>
+                </div>
+            </a>
+        </li>
+
         {{-- <li class="menu">
             <a href="{{route('cobro.registro')}}" aria-expanded="false" class="dropdown-toggle" @if(Str::startsWith(Route::currentRouteName(), 'cobro.registro')) data-active="true" @endif>
                 <div class="">

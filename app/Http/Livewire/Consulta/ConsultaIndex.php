@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Consulta;
 
 use App\Models\Factura;
 use App\Models\FormaCobro;
+use App\Models\PlanPersona;
 use App\Models\RegistroDiario;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -88,6 +89,13 @@ class ConsultaIndex extends Component
             'motivo_anulacion' => 'Se anula en fecha: ' .$fecha,
             'fecha_anulado' => $fecha_anulacion
         ]);
+
+        if ($factura->plan_persona > 0){
+            $planPersona = PlanPersona::find($factura->plan_persona);
+            $planPersona->update([
+                'estado_id' => 2
+            ]);
+        }
 
         $registroDiario = RegistroDiario::find($factura->registro_diario_id);
         $registroDiario->update([

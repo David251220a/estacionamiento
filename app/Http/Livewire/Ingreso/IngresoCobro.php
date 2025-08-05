@@ -464,6 +464,9 @@ class IngresoCobro extends Component
                         $plan_persona = 0;
                     }else{
                         $plan_persona = $this->crear_plan_persona($this->plan_id, $this->cantidad);
+                        if($this->persona->id == 1){
+                            throw new \Exception('Si va a crear un plan debe especificar la persona.');
+                        }
                     }
                 }
 
@@ -530,6 +533,7 @@ class IngresoCobro extends Component
 
                 $registro->update([
                     'facturado' => 1,
+                    'plan_id' => $this->plan_id,
                     'hora_salida' => $hora_salida,
                     'user_id' => auth()->user()->id,
                 ]);
@@ -566,9 +570,12 @@ class IngresoCobro extends Component
                 break;
 
             case 4: // Plan anual
-                $concepto = 'Estacionamiento por ' . $cantidad . ' año(s)';
+                $concepto = 'Estacionamiento por ' . $cantidad . ' mensual';
                 break;
 
+            case 4: // Plan anual
+                $concepto = 'Estacionamiento por ' . $cantidad . ' anual';
+                break;
             default:
                 $concepto = 'Plan desconocido';
                 break;
@@ -590,6 +597,9 @@ class IngresoCobro extends Component
                 $fecha = $fecha_actual->copy()->addWeeks($cantidad)->toDateString();
                 break;
             case 4:
+                $fecha = $fecha_actual->copy()->addMonths($cantidad)->toDateString();
+                break;
+            case 5:
                 $fecha = $fecha_actual->copy()->addYears($cantidad)->toDateString();
                 break;
         }
